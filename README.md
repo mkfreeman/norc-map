@@ -1,3 +1,16 @@
+# NORC MAP
+
+## References / notes
+- Leaflet implementation based on [this
+  repo](https://github.com/ShipBit/sveltekit-leaflet/), referenced in this
+  (actually informative) [video](https://www.youtube.com/watch?v=JFctWXEzFZw&ab_channel=ShipBit)
+- Turns out configuring TailwindCSS with Svelte is a bit of a pain, used
+  [svelte-add](https://github.com/svelte-add/svelte-add) to do this: `npx --yes svelte-add@latest tailwindcss`
+
+
+_information below is from the original development set up template_
+
+--- 
 # Svelte + TS + Vite
 
 This template should help get you started developing with Svelte and TypeScript in Vite.
