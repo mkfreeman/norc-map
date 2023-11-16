@@ -1,22 +1,28 @@
 <script>
   export let checked = true;
   export let onClick = () => {};
-  export let label = "Label";
+  export let imageUrl = "./ttc.svg";
 </script>
 
-<div class="flex items-start mb-3 font-bold cursor-pointer">
-  <div class="flex items-center h-5 cursor-pointer">
-    <input
-      on:click={onClick}
-      {checked}
-      id={label}
-      type="checkbox"
-      class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-    />
-  </div>
-  <label
-    for={label}
-    class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-    >{label}</label
-  >
-</div>
+<button
+  on:click|preventDefault={onClick}
+  class={`py-2 mx-2 hover:border-black border-solid border-2 border-black ${
+    checked ? "opacity-100" : "opacity-30 hover:opacity-50"
+    
+  }`}
+  style="background-image: url({imageUrl});"
+/>
+
+<style>
+  button {    
+    height: 40px;
+    width: 60px;
+    background-repeat: no-repeat;
+    background-size: contain;
+      background-position: center;
+    transition: none;
+  }
+  button:focus {
+    outline: none;
+  }
+</style>

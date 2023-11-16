@@ -40,22 +40,24 @@
 </script>
 
 <div class="w-full h-[calc(100vh-150px)]">
-  <form>
+  <form class="flex">
+    <!-- TODO: rename checkbox to... buttonToggle? -->
     <Checkbox
-      label="Display stations"
+      imageUrl="ttc.svg"
       checked={displayStations}
       onClick={toggleStations}
     />
-    <Checkbox
-      label="Display routes"
-      checked={displayRoutes}
-      onClick={toggleRoutes}
-    />
-    <Checkbox
-      label="Display apartments"
+     <Checkbox
+      imageUrl="apartment.svg"
       checked={displayBuildings}
       onClick={toggleBuildings}
     />
+    <Checkbox   
+      imageUrl="route.svg"   
+      checked={displayRoutes}
+      onClick={toggleRoutes}
+    />
+   
     <!-- TODO: would be fun to have a slider to filter by distance -->
   </form>
   <Leaflet view={initialView} zoom={11}>
@@ -67,7 +69,8 @@
             +norc.geometry.coordinates[1],
             +norc.geometry.coordinates[0],
           ]}
-          fillColor={buildingColor}
+          iconUrl="apartment.svg"
+          iconSize={[15,100]}
         >
           <Popup>Building ID: {norc.properties.cat}</Popup>
         </Marker>
@@ -76,7 +79,7 @@
     {#if stations && displayStations}
       {#each stations as station}
         <!-- TODO: switch lat and long in data -->
-        <Marker latLng={[station[1], station[0]]} fillColor="black" radius={4}>
+        <Marker latLng={[station[1], station[0]]} iconUrl="ttc.svg" radius={4}>
           <Popup>Building ID: {norc.properties.cat}</Popup>
         </Marker>
       {/each}

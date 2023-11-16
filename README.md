@@ -8,8 +8,10 @@
   [svelte-add](https://github.com/svelte-add/svelte-add) to do this: `npx --yes
   svelte-add@latest tailwindcss`
 - Stops downloaded from [here](https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/7795b45e-e65a-4465-81fc-c36b9dfff169/resource/cfb6b2b8-6191-41e3-bda1-b175c51148cb/download/opendata_ttc_schedules.zip)
-
-
+- TTC logo downloaded [here](https://worldvectorlogo.com/downloaded/g-03-a101-ttc-logo)
+- Building logo downloaded
+  [here](https://www.reshot.com/free-svg-icons/item/apartments-5XB6RL3VT7/)
+- Route logo downloaded [here](https://www.reshot.com/free-svg-icons/item/map-route-NSD39WHTAV/)
 _information below is from the original development set up template_
 
 --- 
