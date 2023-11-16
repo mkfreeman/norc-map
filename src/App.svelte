@@ -3,83 +3,90 @@
   import Leaflet from "./lib/Leaflet.svelte";
   import Marker from "./lib/Marker.svelte";
   import Popup from "./lib/Popup.svelte";
+  import PolyLine from "./lib/PolyLine.svelte";
+  import Checkbox from "./lib/Checkbox.svelte";
   import type { LatLngExpression } from "leaflet";
-  const initialView: LatLngExpression = [43.65107, -79.397015];
   import * as d3 from "d3";
-  let data;
-  let mapData;
+
+  const stationColor = "black";
+  const buildingColor = "blue";
+  const initialView: LatLngExpression = [43.70107, -79.397015];
+  let centroids;
+  let paths;
   let stations;
-  let accessibleOnly = true;
-  let subwayOnly = true;
+  let displayStations = true;
+  let displayRoutes = true;
+  let displayBuildings = true;
   onMount(async () => {
-    // TODO: filter down to pre-set bounds
-    data = await d3.csv("./stops.txt");
-    mapData = data;
+    // TODO: filter down to pre-set bounds    
+    centroids = await fetch(
+      "./sample_toronto_apartments_CENTROIDS.geojson"
+    ).then((res) => res.json());
+    paths = await fetch("./sample_toronto_apartments_PATHS.geojson").then(
+      (res) => res.json()
+    );
+    // TODO: load this data from a file
+    stations = paths.features.map((d) => d.geometry.coordinates.slice(-1)[0]);
   });
-  function toggleSubway() {
-    subwayOnly = !subwayOnly;
+  function toggleStations() {
+    displayStations = !displayStations;
   }
-  function handleClick() {
-    accessibleOnly = !accessibleOnly;
+  function toggleRoutes() {
+    displayRoutes = !displayRoutes;
   }
-  $: mapData = !data
-    ? []
-    : data.filter((d) => {
-        const isSubway = d.stop_name.includes("Station");
-        const isaccessible = d.wheelchair_boarding === "1";
-        return (
-          (subwayOnly ? isSubway : true) &&
-          (accessibleOnly ? isaccessible : true)
-        );
-      });
+  function toggleBuildings() {
+    displayBuildings = !displayBuildings;
+  }
 </script>
 
 <div class="w-full h-[calc(100vh-150px)]">
   <form>
-    <div class="flex items-start mb-3 font-bold cursor-pointer">
-      <div class="flex items-center h-5 cursor-pointer">
-        <input
-          on:click={toggleSubway}
-          checked={subwayOnly}
-          id="subway"
-          type="checkbox"
-          class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-        />
-      </div>
-      <label
-        for="subway"
-        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-        >Subway only (<em>a little slow</em>)</label
-      >
-    </div>
-    <div class="flex items-start mb-3 font-bold cursor-pointer">
-      <div class="flex items-center h-5 cursor-pointer">
-        <input
-          on:click={handleClick}
-          checked={accessibleOnly}
-          id="accessible"
-          type="checkbox"
-          class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
-        />
-      </div>
-      <label
-        for="accessible"
-        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-        >Accessible only</label
-      >
-    </div>
+    <Checkbox
+      label="Display stations"
+      checked={displayStations}
+      onClick={toggleStations}
+    />
+    <Checkbox
+      label="Display routes"
+      checked={displayRoutes}
+      onClick={toggleRoutes}
+    />
+    <Checkbox
+      label="Display apartments"
+      checked={displayBuildings}
+      onClick={toggleBuildings}
+    />
+    <!-- TODO: would be fun to have a slider to filter by distance -->
   </form>
-  <Leaflet view={initialView} zoom={14}>
-    {#if mapData}
-      {#each mapData as stop}
+  <Leaflet view={initialView} zoom={11}>
+    {#if centroids?.features && displayBuildings}
+      {#each centroids.features as norc}
+        <!-- TODO: switch lat and long in data -->
         <Marker
-          latLng={[+stop.stop_lat, +stop.stop_lon]}
-          width={20}
-          height={20}
+          latLng={[
+            +norc.geometry.coordinates[1],
+            +norc.geometry.coordinates[0],
+          ]}
+          fillColor={buildingColor}
         >
-          <div class="bg-black w-3 h-3 rounded-full" />
-          <Popup>{stop.stop_name}</Popup>
+          <Popup>Building ID: {norc.properties.cat}</Popup>
         </Marker>
+      {/each}
+    {/if}
+    {#if stations && displayStations}
+      {#each stations as station}
+        <!-- TODO: switch lat and long in data -->
+        <Marker latLng={[station[1], station[0]]} fillColor="black" radius={4}>
+          <Popup>Building ID: {norc.properties.cat}</Popup>
+        </Marker>
+      {/each}
+    {/if}
+    {#if paths?.features && displayRoutes}
+      {#each paths.features as path}
+        <!-- TODO: switch lat and long in data -->
+        <PolyLine
+          latLngs={path.geometry.coordinates.map((d) => [+d[1], +d[0]])}
+        />
       {/each}
     {/if}
   </Leaflet>
