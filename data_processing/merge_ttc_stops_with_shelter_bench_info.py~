@@ -1,0 +1,25 @@
+import pandas as pd
+
+# Read the CSV file into a DataFrame
+stops_df = pd.read_csv('stops.txt')
+
+# Read the Excel file into a DataFrame
+shelters_df = pd.read_excel('Transit_Shelters_With_Benches_11062023 (1).XLS')
+
+# Remove the 'T' from the SITEID column and convert it to integer
+shelters_df['SITEID'] = shelters_df['SITEID'].str.replace('T', '').astype(int)
+
+# Perform a left join on the stop_code and SITEID columns
+combined_df = pd.merge(stops_df, shelters_df[['SITEID']], left_on='stop_code', right_on='SITEID', how='left', indicator=True)
+
+# Add the 'has_shelter_with_bench' column
+combined_df['has_shelter_with_bench'] = combined_df['_merge'] == 'both'
+
+# Drop unnecessary columns
+combined_df.drop(columns=['SITEID', '_merge'], inplace=True)
+
+# Save the updated DataFrame to a new CSV file, if needed
+combined_df.to_csv('updated_stops.csv', index=False)
+
+# Display the first few rows of the DataFrame
+print(combined_df.head())
