@@ -5,18 +5,22 @@ from routingpy import Valhalla
 from shapely.geometry import Point, LineString, mapping
 import json
 
+# by default we assume you are running a Valhalla server. Pass in the
+# empty string to run against the Valhalla public server, but this will
+# be very slow
 def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla_server_url='http://localhost:8002'):
     # Load the data
     norcs_df = pd.read_excel(norcs_file)
     stops_df = pd.read_csv(stops_file)
 
-    # Initialize the routing client with the local Valhalla server
+    # Initialize the routing client with the Valhalla server
     client = Valhalla(base_url=valhalla_server_url)
     #client = Valhalla()
     # Prepare the output list
     gdf_list = []
 
-    # Iterate through each NORC
+    # Iterate through each NORC, and identify a subset of stops that
+    # might be the closest just based on straight line distance
     for _, norc in norcs_df.iterrows():
         norc_point = (norc['longitude'], norc['latitude'])
         print(norc['Address'])
@@ -31,6 +35,8 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
                 nearby_stops.append(stop)
         print("Number of nearby stops: ", len(nearby_stops))
         # Compute walking distances and paths
+        # for the candidate stops, use Valhalla to find the actual
+        # walking path. 
         shortest_distance = float('inf')
         shortest_path = None
         for stop in nearby_stops:
@@ -58,5 +64,7 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
     # Save as GeoJSON
     final_gdf.to_file('output.geojson', driver='GeoJSON')
 
-# Example usage:
+# Example usage: Note the 300, which indicates TTC stop candidates are
+# up to 300 meters from the building. This is rather large, but
+# will make sure every stop is included. 
 calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 300)
