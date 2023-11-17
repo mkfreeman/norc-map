@@ -39,4 +39,4 @@ combined_df = update_stops_data(combined_df, shelters_with_benches_df, "TTC Stop
 
 combined_df = update_stops_data(combined_df, benches_df, "SITEID", "has_bench")
 
-combined_df.to_csv("stops_with_shelter_bench_info.csv")
+combined_df.to_csv("stops_with_shelter_bench_info.csv", index=False)
