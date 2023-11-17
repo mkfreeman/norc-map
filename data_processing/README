@@ -17,4 +17,12 @@ to get the latest version of Valhalla. Then, we run Valhalla with the Ontario Op
 
 docker run -dt --name valhalla_gis-ops -p 8002:8002 -v $PWD/custom_files:/custom_files -e tile_urls=https://download.geofabrik.de/north-america/canada/ontario-latest.osm.pbf ghcr.io/gis-ops/docker-valhalla/valhalla:latest
 
-If this is your first run of this command, it will take probably 5 to 10 minutes to pull the data and process it into the custom_files folder. After that, you can run path searches as per the generate_shortest_paths_to_stops.py file.
+It will take probably 5 to 10 minutes to pull the data and process it into the custom_files folder. After that, you can run path searches as per the generate_shortest_paths_to_stops.py file.
+
+To stop the docker, run
+
+docker stop valhalla_gis-ops
+
+and to start it again
+
+docker start valhalla_gis-ops
