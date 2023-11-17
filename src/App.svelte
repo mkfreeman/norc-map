@@ -6,7 +6,7 @@
   import Histogram from "./lib/Histogram.svelte";
   import PolyLine from "./lib/PolyLine.svelte";
   import Checkbox from "./lib/Checkbox.svelte";
-  import Radio from "./lib/Radio.svelte";
+  import Table from "./lib/Table.svelte";
   import type { LatLngExpression } from "leaflet";
   import * as d3 from "d3";
 
@@ -38,7 +38,7 @@
     distances = data.features.map((d) => d.properties.distance);
     numSeniors = data.features.map((d) => d.properties["Age 65+ Total"]);
     distanceLimits = [0, Math.max(...distances)];
-    numSeniorsLimit = [0, Math.max(...numSeniors)];    
+    numSeniorsLimit = [0, Math.max(...numSeniors)];
   });
   function toggleStations() {
     displayStations = !displayStations;
@@ -138,4 +138,21 @@
       {/if}
     </Leaflet>
   </div>
+  {#if mapData}
+    <Table
+      items={mapData.map((d) => ({
+        Address: d.properties.Address,
+        "Nearest Stop": d.properties.stop_name,
+        Distance: +d.properties.distance,
+        "# Seniors": d.properties["Age 65+ Total"],
+        "# People": d.properties.All_Persons,
+        "% seniors": d3.format(".1%")(d.properties["% of Seniors"]),
+        "Wheelchair Boarding": d.properties.wheelchair_boarding,
+        "Has Shelter": d.properties.has_shelter,
+        "Shelter + Bench": d.properties.has_shelter_with_bench,
+        "Has Bench": d.properties.has_bench,
+      }))}
+      sortBy="Distance"
+    />
+  {/if}
 </div>
