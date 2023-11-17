@@ -52,6 +52,9 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
     # Combine all GeoDataFrames
     final_gdf = pd.concat(gdf_list, ignore_index=True)
 
+    # add a building id to the file since there isn't one in the raw data
+    final_gdf['id'] = range(1, len(final_gdf) + 1)
+    
     # Save as GeoJSON
     final_gdf.to_file('output.geojson', driver='GeoJSON')
 
