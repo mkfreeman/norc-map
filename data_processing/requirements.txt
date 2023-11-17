@@ -1,0 +1,5 @@
+geopandas==0.13.1
+geopy==2.4.0
+pandas==2.0.2
+routingpy==1.3.0
+Shapely==2.0.2
