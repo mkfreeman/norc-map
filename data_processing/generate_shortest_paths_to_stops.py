@@ -52,8 +52,10 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
         # Construct GeoJSON feature
         if shortest_path:
             properties = {**norc.to_dict(), **closest_stop.to_dict(), 'distance': shortest_distance}
-            gdf = gpd.GeoDataFrame([properties], geometry=[shortest_path], crs="EPSG:4326")
-            gdf_list.append(gdf)
+        else:
+            properties = {**norc.to_dict(), 'distance': None}
+        gdf = gpd.GeoDataFrame([properties], geometry=[shortest_path], crs="EPSG:4326")
+        gdf_list.append(gdf)
 
     # Combine all GeoDataFrames
     final_gdf = pd.concat(gdf_list, ignore_index=True)
@@ -67,4 +69,5 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
 # Example usage: Note the 300, which indicates TTC stop candidates are
 # up to 300 meters from the building. This is rather large, but
 # will make sure every stop is included. 
-calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 300)
+#calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 300)
+calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/ttc_subway_stations.csv', 800)
