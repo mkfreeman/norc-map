@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher, onDestroy } from "svelte";
 
-  $: sortOrder = 1;
+  $: sortOrder = -1;
   let maxHeight = "400px";
 
   export let items = [];
