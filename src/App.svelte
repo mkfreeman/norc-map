@@ -6,7 +6,9 @@
   import Histogram from "./lib/Histogram.svelte";
   import PolyLine from "./lib/PolyLine.svelte";
   import Checkbox from "./lib/Checkbox.svelte";
+  import Radio from "./lib/Radio.svelte";
   import type { LatLngExpression } from "leaflet";
+  import * as d3 from "d3";
 
   const initialView: LatLngExpression = [43.70107, -79.397015];
   let centroids;
@@ -17,6 +19,19 @@
   let displayBuildings = true;
   let distances;
   let distanceLimits: [number, number] = [0, 1];
+  let allStops;
+
+  function handleUpdate(selected: string) {
+    selectedOption = selected;    
+  }
+
+  $: selectedOption = "wheelchair_boarding";
+  const radioOptions = [
+    { value: "wheelchair_boarding", label: "Wheelchair boarding" },
+    { value: "has_shelter", label: "Has shelter" },
+    { value: "has_shelter_with_bench", label: "Has shelter with bench" },
+    { value: "has_bench", label: "Has bench" },
+  ];
   onMount(async () => {
     // TODO: filter down to pre-set bounds
     centroids = await fetch(
@@ -31,6 +46,9 @@
     );
     distances = allPaths.features.map((d) => d.properties.dist);
     distanceLimits = [0, Math.max(...distances)];
+    // TODO: Remove this later, just including temporarily(?) to explore the
+    // stops
+    allStops = await d3.csv("stops_with_shelter_bench_info.csv");
   });
   function toggleStations() {
     displayStations = !displayStations;
@@ -116,6 +134,38 @@
           <PolyLine
             latLngs={path.geometry.coordinates.map((d) => [+d[1], +d[0]])}
           />
+        {/each}
+      {/if}
+    </Leaflet>
+  </div>
+  <br />
+  <h1 class="flex pb-2 text-2xl">Exploring TTC stops</h1>
+  <div class="h-[calc(100vh-250px)]">
+    <Radio
+      label="Color by:"
+      options={radioOptions}
+      selected={selectedOption}
+      updateMethod={handleUpdate}
+    />
+    <Leaflet view={initialView} zoom={11}>
+      {#if allStops}
+        {#each allStops as station}
+          <Marker
+            key={station.stop_id + selectedOption}
+            latLng={[station.stop_lat, station.stop_lon]}
+            radius={4}
+            fillColor={station[selectedOption] == 1 ||
+            station[selectedOption] === "True"
+              ? "blue"
+              : "red"}
+          >
+            <Popup
+              >{station.stop_name}<br />
+              {radioOptions.find((d) => d.value === selectedOption).label}: {station[
+                selectedOption
+              ]}</Popup
+            >
+          </Marker>
         {/each}
       {/if}
     </Leaflet>
