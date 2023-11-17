@@ -11,18 +11,17 @@
   import * as d3 from "d3";
 
   const initialView: LatLngExpression = [43.70107, -79.397015];
-  let centroids;
-  let allPaths;
-  let stations;
   let displayStations = true;
   let displayRoutes = true;
   let displayBuildings = true;
-  let distances;
+  let distances: number[];
+  let numSeniors: number[];
   let distanceLimits: [number, number] = [0, 1];
-  let allStops;
+  let numSeniorsLimit: [number, number] = [0, 1];
+  let data;
 
   function handleUpdate(selected: string) {
-    selectedOption = selected;    
+    selectedOption = selected;
   }
 
   $: selectedOption = "wheelchair_boarding";
@@ -33,22 +32,13 @@
     { value: "has_bench", label: "Has bench" },
   ];
   onMount(async () => {
-    // TODO: filter down to pre-set bounds
-    centroids = await fetch(
-      "./sample_toronto_apartments_CENTROIDS.geojson"
-    ).then((res) => res.json());
-    allPaths = await fetch("./sample_toronto_apartments_PATHS.geojson").then(
-      (res) => res.json()
+    data = await fetch("./output_paths_with_data.geojson").then((res) =>
+      res.json()
     );
-    // TODO: load this data from a file
-    stations = allPaths.features.map(
-      (d) => d.geometry.coordinates.slice(-1)[0]
-    );
-    distances = allPaths.features.map((d) => d.properties.dist);
+    distances = data.features.map((d) => d.properties.distance);
+    numSeniors = data.features.map((d) => d.properties["Age 65+ Total"]);
     distanceLimits = [0, Math.max(...distances)];
-    // TODO: Remove this later, just including temporarily(?) to explore the
-    // stops
-    allStops = await d3.csv("stops_with_shelter_bench_info.csv");
+    numSeniorsLimit = [0, Math.max(...numSeniors)];    
   });
   function toggleStations() {
     displayStations = !displayStations;
@@ -62,10 +52,15 @@
   function setDistanceLimit(range: [number, number]) {
     distanceLimits = range || [0, Math.max(...distances)];
   }
-  $: paths = allPaths?.features.filter((d) => {
+  function setNumSeniorsLimit(range: [number, number]) {
+    numSeniorsLimit = range || [0, Math.max(...numSeniors)];
+  }
+  $: mapData = data?.features.filter((d) => {
     return (
-      d.properties.dist >= distanceLimits[0] &&
-      d.properties.dist <= distanceLimits[1]
+      d.properties.distance >= distanceLimits[0] &&
+      d.properties.distance <= distanceLimits[1] &&
+      d.properties["Age 65+ Total"] >= numSeniorsLimit[0] &&
+      d.properties["Age 65+ Total"] <= numSeniorsLimit[1]
     );
   });
 </script>
@@ -89,83 +84,56 @@
       checked={displayRoutes}
       onClick={toggleRoutes}
     />
-    {#if distances}
-      <Histogram
-        data={distances}
-        label="Distance →"
-        onUpdate={setDistanceLimit}
-      />
-    {/if}
-
-    <!-- TODO: would be fun to have a slider to filter by distance -->
+    <div class="flex">
+      {#if distances}
+        <Histogram
+          data={distances}
+          label="Distance →"
+          onUpdate={setDistanceLimit}
+        />
+      {/if}
+      {#if numSeniors}
+        <Histogram
+          data={numSeniors}
+          label="Num. Seniors →"
+          onUpdate={setNumSeniorsLimit}
+        />
+      {/if}
+    </div>
   </form>
   <div class="h-[calc(100vh-250px)]">
     <Leaflet view={initialView} zoom={11}>
-      {#if centroids?.features && displayBuildings}
-        {#each centroids.features as norc}
-          <!-- TODO: switch lat and long in data -->
-          <Marker
-            latLng={[
-              +norc.geometry.coordinates[1],
-              +norc.geometry.coordinates[0],
-            ]}
-            iconUrl="apartment.svg"
-            iconSize={[15, 100]}
-          >
-            <Popup>Building ID: {norc.properties.cat}</Popup>
-          </Marker>
-        {/each}
-      {/if}
-      {#if stations && displayStations}
-        {#each stations as station}
-          <!-- TODO: switch lat and long in data -->
-          <Marker
-            latLng={[station[1], station[0]]}
-            iconUrl="ttc.svg"
-            radius={4}
-          >
-            <Popup>Building ID: {norc.properties.cat}</Popup>
-          </Marker>
-        {/each}
-      {/if}
-      {#if paths && displayRoutes}
-        {#each paths as path}
-          <!-- TODO: switch lat and long in data -->
-          <PolyLine
-            latLngs={path.geometry.coordinates.map((d) => [+d[1], +d[0]])}
-          />
-        {/each}
-      {/if}
-    </Leaflet>
-  </div>
-  <br />
-  <h1 class="flex pb-2 text-2xl">Exploring TTC stops</h1>
-  <div class="h-[calc(100vh-250px)]">
-    <Radio
-      label="Color by:"
-      options={radioOptions}
-      selected={selectedOption}
-      updateMethod={handleUpdate}
-    />
-    <Leaflet view={initialView} zoom={11}>
-      {#if allStops}
-        {#each allStops as station}
-          <Marker
-            key={station.stop_id + selectedOption}
-            latLng={[station.stop_lat, station.stop_lon]}
-            radius={4}
-            fillColor={station[selectedOption] == 1 ||
-            station[selectedOption] === "True"
-              ? "blue"
-              : "red"}
-          >
-            <Popup
-              >{station.stop_name}<br />
-              {radioOptions.find((d) => d.value === selectedOption).label}: {station[
-                selectedOption
-              ]}</Popup
+      {#if mapData}
+        {#each mapData as building (building.properties.id)}
+          {#if displayBuildings}
+            <Marker
+              latLng={[
+                +building.properties.latitude,
+                +building.properties.longitude,
+              ]}
+              iconUrl="apartment.svg"
+              iconSize={[15, 100]}
             >
-          </Marker>
+              <Popup>Building ID: {building.properties.Address}</Popup>
+            </Marker>
+          {/if}
+          {#if displayStations}
+            <Marker
+              latLng={[
+                +building.properties.stop_lat,
+                +building.properties.stop_lon,
+              ]}
+              radius={4}
+              fillColor="red"
+            >
+              <Popup>Stop: {building.properties.stop_name}</Popup>
+            </Marker>
+          {/if}
+          {#if displayRoutes}
+            <PolyLine
+              latLngs={building.geometry.coordinates.map((d) => [+d[1], +d[0]])}
+            />
+          {/if}
         {/each}
       {/if}
     </Leaflet>

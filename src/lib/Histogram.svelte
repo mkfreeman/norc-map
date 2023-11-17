@@ -11,22 +11,23 @@
   } from "d3";
 
   export let data = Array.from({ length: 100 }, (_, i) => i);
-  export let width = 400;
+  export let width = 250;
   export let height = 75;
   export let onUpdate = null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
-
+  let el;
   onMount(() => {
-    const margin = { top: 10, right: 30, bottom: 30, left: 30 };
+    const margin = { top: 10, right: 30, bottom: 35, left: 30 };
 
-    const svg = select(".histogram")
+    const svg = select(el)
       .append("svg")
       .attr("width", width)
       .attr("height", height);
 
     const x = scaleLinear()
       .domain(extent(data))
-      .range([margin.left, width - margin.right]);
+      .range([margin.left, width - margin.right])
+      .nice();
 
     const histogramData = bin().domain(x.domain()).thresholds(x.ticks(20))(
       data
@@ -72,7 +73,7 @@
     svg
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(axisBottom(x));
+      .call(axisBottom(x).ticks(4));
 
     svg
       .append("g")
@@ -103,7 +104,7 @@
   });
 </script>
 
-<div class="histogram" />
+<div bind:this={el} class="histogram" />
 
 <style>
   .histogram {

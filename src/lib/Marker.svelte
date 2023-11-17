@@ -34,7 +34,12 @@
             iconSize,
           }),
         }).addTo(map)
-      : L.circleMarker(latLng, { radius, fillColor, stroke: false }).addTo(map);
+      : L.circleMarker(latLng, {
+          radius,
+          fillColor,
+          stroke: false,
+          fillOpacity: 1,
+        }).addTo(map);
   }
 
   onMount(() => {
