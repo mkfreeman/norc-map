@@ -8,6 +8,7 @@ import json
 # by default we assume you are running a Valhalla server. Pass in the
 # empty string to run against the Valhalla public server, but this will
 # be very slow
+# TODO(omar): need to handle loading in different types of data, basically Excel, CSV and GeoJSON. That should cover everything. 
 def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla_server_url='http://localhost:8002'):
     # Load the data
     norcs_df = pd.read_excel(norcs_file)
@@ -69,5 +70,5 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
 # Example usage: Note the 300, which indicates TTC stop candidates are
 # up to 300 meters from the building. This is rather large, but
 # will make sure every stop is included. 
-#calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 300)
-calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/ttc_subway_stations.csv', 800)
+calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 300)
+#calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/ttc_subway_stations.csv', 800)
