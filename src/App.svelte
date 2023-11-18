@@ -16,9 +16,7 @@
   let displayRoutes = true;
   let displayBuildings = true;
   let distances: number[];
-  let numSeniors: number[];
-  let distanceLimits: [number, number] = [0, 1];
-  let numSeniorsLimit: [number, number] = [0, 1];
+  let numSeniors: number[];  
   let data;
   let filters = [];
   const filterOptions = [
@@ -34,8 +32,6 @@
     );
     distances = data.features.map((d) => d.properties.distance);
     numSeniors = data.features.map((d) => d.properties["Age 65+ Total"]);
-    distanceLimits = [0, Math.max(...distances)];
-    numSeniorsLimit = [0, Math.max(...numSeniors)];
   });
   // Map element visibility
   function toggleStations() {
@@ -49,12 +45,6 @@
   }
 
   // Data filters
-  function setDistanceLimit(range: [number, number]) {
-    if (range) toggleFilter("distance", range);
-  }
-  function setNumSeniorsLimit(range: [number, number]) {
-    numSeniorsLimit = range || [0, Math.max(...numSeniors)];
-  }
   $: mapData = data?.features.filter((d) => {
     return filters.every((f) => {
       return typeof f.value === "string"
@@ -67,7 +57,11 @@
   });
 
   function toggleFilter(prop, value) {
-    if (filters.find((f) => f.prop === prop && f.value === value)) {
+    if (
+      filters.find(
+        (f) => f.prop === prop && (f.value === value || value === null)
+      )
+    ) {
       $: filters = filters.filter((f) => f.prop !== prop);
     } else {
       $: filters = [...filters.filter((f) => f.prop !== prop), { prop, value }];
@@ -100,14 +94,14 @@
         <Histogram
           data={distances}
           label="Distance →"
-          onUpdate={setDistanceLimit}
+          onUpdate={(range) => toggleFilter("distance", range)}
         />
       {/if}
       {#if numSeniors}
         <Histogram
           data={numSeniors}
           label="Num. Seniors →"
-          onUpdate={setNumSeniorsLimit}
+          onUpdate={(range) => toggleFilter("Age 65+ Total", range)}
         />
       {/if}
     </div>
@@ -162,7 +156,7 @@
             <PolyLine
               latLngs={building.geometry.coordinates.map((d) => [+d[1], +d[0]])}
             >
-            <Popup>{@html getPopupContent(building)}</Popup>
+              <Popup>{@html getPopupContent(building)}</Popup>
             </PolyLine>
           {/if}
         {/each}
