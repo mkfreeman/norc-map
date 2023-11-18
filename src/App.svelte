@@ -73,6 +73,13 @@
       $: filters = [...filters.filter((f) => f.prop !== prop), { prop, value }];
     }
   }
+  function getPopupContent(building) {
+    return `
+      <em>Building: </em>${building.properties.Address}<br/>
+      <em>Stop</em>: ${building.properties.stop_name}<br/>
+      <em>Distance</em>: ${building.properties.distance}m
+    `;
+  }
 </script>
 
 <div class="w-full">
@@ -136,7 +143,7 @@
               iconUrl="apartment.svg"
               iconSize={[15, 100]}
             >
-              <Popup>Building ID: {building.properties.Address}</Popup>
+              <Popup>{@html getPopupContent(building)}</Popup>
             </Marker>
           {/if}
           {#if displayStations}
@@ -148,13 +155,15 @@
               radius={4}
               fillColor="red"
             >
-              <Popup>Stop: {building.properties.stop_name}</Popup>
+              <Popup>{@html getPopupContent(building)}</Popup>
             </Marker>
           {/if}
           {#if displayRoutes}
             <PolyLine
               latLngs={building.geometry.coordinates.map((d) => [+d[1], +d[0]])}
-            />
+            >
+            <Popup>{@html getPopupContent(building)}</Popup>
+            </PolyLine>
           {/if}
         {/each}
       {/if}
