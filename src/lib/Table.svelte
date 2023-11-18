@@ -20,7 +20,7 @@
 </script>
 
 <div class="overflow-x-auto" style="max-height: {maxHeight};">
-  {#if tableData}
+  {#if tableData && tableData.length > 0}
     <table class="min-w-full">
       <!-- Table Headers -->
       <thead class="sticky top-0 bg-white">

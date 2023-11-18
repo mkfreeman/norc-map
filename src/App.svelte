@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import Leaflet from "./lib/Leaflet.svelte";
   import Marker from "./lib/Marker.svelte";
+  import ToggleChart from "./lib/ToggleChart.svelte";
   import Popup from "./lib/Popup.svelte";
   import Histogram from "./lib/Histogram.svelte";
   import PolyLine from "./lib/PolyLine.svelte";
@@ -19,18 +20,14 @@
   let distanceLimits: [number, number] = [0, 1];
   let numSeniorsLimit: [number, number] = [0, 1];
   let data;
-
-  function handleUpdate(selected: string) {
-    selectedOption = selected;
-  }
-
-  $: selectedOption = "wheelchair_boarding";
-  const radioOptions = [
-    { value: "wheelchair_boarding", label: "Wheelchair boarding" },
-    { value: "has_shelter", label: "Has shelter" },
-    { value: "has_shelter_with_bench", label: "Has shelter with bench" },
-    { value: "has_bench", label: "Has bench" },
+  let filters = [];
+  const filterOptions = [
+    { prop: "wheelchair_boarding", label: "Wheelchair boarding" },
+    { prop: "has_shelter", label: "Has shelter" },
+    { prop: "has_shelter_with_bench", label: "Has shelter with bench" },
+    { prop: "has_bench", label: "Has bench" },
   ];
+
   onMount(async () => {
     data = await fetch("./output_paths_with_data.geojson").then((res) =>
       res.json()
@@ -40,6 +37,7 @@
     distanceLimits = [0, Math.max(...distances)];
     numSeniorsLimit = [0, Math.max(...numSeniors)];
   });
+  // Map element visibility
   function toggleStations() {
     displayStations = !displayStations;
   }
@@ -49,24 +47,64 @@
   function toggleBuildings() {
     displayBuildings = !displayBuildings;
   }
+
+  // Data filters
   function setDistanceLimit(range: [number, number]) {
-    distanceLimits = range || [0, Math.max(...distances)];
+    if (range) toggleFilter("distance", range);
   }
   function setNumSeniorsLimit(range: [number, number]) {
     numSeniorsLimit = range || [0, Math.max(...numSeniors)];
   }
   $: mapData = data?.features.filter((d) => {
-    return (
-      d.properties.distance >= distanceLimits[0] &&
-      d.properties.distance <= distanceLimits[1] &&
-      d.properties["Age 65+ Total"] >= numSeniorsLimit[0] &&
-      d.properties["Age 65+ Total"] <= numSeniorsLimit[1]
-    );
+    return filters.every((f) => {
+      return typeof f.value === "string"
+        ? `${d.properties[f.prop]}` == f.value
+        : Array.isArray(f.value)
+        ? d.properties[f.prop] >= f.value[0] &&
+          d.properties[f.prop] <= f.value[1]
+        : false;
+    });
   });
+
+  function toggleFilter(prop, value) {
+    if (filters.find((f) => f.prop === prop && f.value === value)) {
+      $: filters = filters.filter((f) => f.prop !== prop);
+    } else {
+      $: filters = [...filters.filter((f) => f.prop !== prop), { prop, value }];
+    }
+  }
 </script>
 
 <div class="w-full">
   <h1 class="flex pb-2 text-2xl">Naturally Occuring Retirement Communities</h1>
+  {#if data}
+    <div class="flex">
+      {#each filterOptions as option}
+        <ToggleChart
+          prop={option.prop}
+          label={option.label}
+          selected={filters.find((d) => d.prop === option.prop)?.value}
+          {data}
+          handleClick={(event) =>
+            toggleFilter(option.prop, event.target.ariaLabel)}
+        />
+      {/each}
+      {#if distances}
+        <Histogram
+          data={distances}
+          label="Distance →"
+          onUpdate={setDistanceLimit}
+        />
+      {/if}
+      {#if numSeniors}
+        <Histogram
+          data={numSeniors}
+          label="Num. Seniors →"
+          onUpdate={setNumSeniorsLimit}
+        />
+      {/if}
+    </div>
+  {/if}
   <form class="flex">
     <!-- TODO: rename checkbox to... buttonToggle? -->
     <Checkbox
@@ -84,22 +122,6 @@
       checked={displayRoutes}
       onClick={toggleRoutes}
     />
-    <div class="flex">
-      {#if distances}
-        <Histogram
-          data={distances}
-          label="Distance →"
-          onUpdate={setDistanceLimit}
-        />
-      {/if}
-      {#if numSeniors}
-        <Histogram
-          data={numSeniors}
-          label="Num. Seniors →"
-          onUpdate={setNumSeniorsLimit}
-        />
-      {/if}
-    </div>
   </form>
   <div class="h-[calc(100vh-250px)]">
     <Leaflet view={initialView} zoom={11}>
