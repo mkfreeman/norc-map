@@ -6,7 +6,7 @@
 
 <button
   on:click|preventDefault={onClick}
-  class={`py-2 mx-2 hover:border-black border-solid border-2 border-black ${
+  class={`py-2 mx-2 my-1 hover:border-black border-solid border-2 border-black ${
     checked ? "opacity-100" : "opacity-30 hover:opacity-50"
   }`}
   style="background-image: url({imageUrl});"

@@ -16,7 +16,7 @@
   let displayRoutes = true;
   let displayBuildings = true;
   let distances: number[];
-  let numSeniors: number[];  
+  let numSeniors: number[];
   let data;
   let filters = [];
   const filterOptions = [
@@ -79,7 +79,7 @@
 <div class="w-full">
   <h1 class="flex pb-2 text-2xl">Naturally Occuring Retirement Communities</h1>
   {#if data}
-    <div class="flex">
+    <div class="flex flex-wrap">
       {#each filterOptions as option}
         <ToggleChart
           prop={option.prop}
@@ -106,62 +106,69 @@
       {/if}
     </div>
   {/if}
-  <form class="flex">
-    <!-- TODO: rename checkbox to... buttonToggle? -->
-    <Checkbox
-      imageUrl="ttc.svg"
-      checked={displayStations}
-      onClick={toggleStations}
-    />
-    <Checkbox
-      imageUrl="apartment.svg"
-      checked={displayBuildings}
-      onClick={toggleBuildings}
-    />
-    <Checkbox
-      imageUrl="route.svg"
-      checked={displayRoutes}
-      onClick={toggleRoutes}
-    />
-  </form>
-  <div class="h-[calc(100vh-250px)]">
-    <Leaflet view={initialView} zoom={11}>
-      {#if mapData}
-        {#each mapData as building (building.properties.id)}
-          {#if displayBuildings}
-            <Marker
-              latLng={[
-                +building.properties.latitude,
-                +building.properties.longitude,
-              ]}
-              iconUrl="apartment.svg"
-              iconSize={[15, 100]}
-            >
-              <Popup>{@html getPopupContent(building)}</Popup>
-            </Marker>
-          {/if}
-          {#if displayStations}
-            <Marker
-              latLng={[
-                +building.properties.stop_lat,
-                +building.properties.stop_lon,
-              ]}
-              radius={4}
-              fillColor="red"
-            >
-              <Popup>{@html getPopupContent(building)}</Popup>
-            </Marker>
-          {/if}
-          {#if displayRoutes}
-            <PolyLine
-              latLngs={building.geometry.coordinates.map((d) => [+d[1], +d[0]])}
-            >
-              <Popup>{@html getPopupContent(building)}</Popup>
-            </PolyLine>
-          {/if}
-        {/each}
-      {/if}
-    </Leaflet>
+  <div class="flex">
+    <div style="width: 80px;">
+      <form class="flex flex-wrap">
+        <!-- TODO: rename checkbox to... buttonToggle? -->
+        <Checkbox
+          imageUrl="ttc.svg"
+          checked={displayStations}
+          onClick={toggleStations}
+        />
+        <Checkbox
+          imageUrl="apartment.svg"
+          checked={displayBuildings}
+          onClick={toggleBuildings}
+        />
+        <Checkbox
+          imageUrl="route.svg"
+          checked={displayRoutes}
+          onClick={toggleRoutes}
+        />
+      </form>
+    </div>
+    <div class="w-[calc(100%-80px)] h-[calc(100vh-250px)]">
+      <Leaflet view={initialView} zoom={11}>
+        {#if mapData}
+          {#each mapData as building (building.properties.id)}
+            {#if displayBuildings}
+              <Marker
+                latLng={[
+                  +building.properties.latitude,
+                  +building.properties.longitude,
+                ]}
+                iconUrl="apartment.svg"
+                iconSize={[15, 100]}
+              >
+                <Popup>{@html getPopupContent(building)}</Popup>
+              </Marker>
+            {/if}
+            {#if displayStations}
+              <Marker
+                latLng={[
+                  +building.properties.stop_lat,
+                  +building.properties.stop_lon,
+                ]}
+                radius={4}
+                fillColor="red"
+              >
+                <Popup>{@html getPopupContent(building)}</Popup>
+              </Marker>
+            {/if}
+            {#if displayRoutes}
+              <PolyLine
+                latLngs={building.geometry.coordinates.map((d) => [
+                  +d[1],
+                  +d[0],
+                ])}
+              >
+                <Popup>{@html getPopupContent(building)}</Popup>
+              </PolyLine>
+            {/if}
+          {/each}
+        {/if}
+      </Leaflet>
+    </div>
   </div>
   {#if mapData}
     <Table
