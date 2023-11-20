@@ -6,8 +6,6 @@
   export let selected;
   export let label;
   export let prop;
-
-  $: console.log(selected);
 </script>
 
 <div class="mx-1">
@@ -16,8 +14,8 @@
     options={{
       width: 200,
       marginTop: 10,
-      color: {        
-        range: ["rgb(104,175,252)", "rgb(164 114 244)"]
+      color: {
+        range: ["rgb(104,175,252)", "rgb(164 114 244)"],
       },
       marks: [
         Plot.barX(
@@ -26,6 +24,8 @@
             {
               x: "count",
               ariaLabel: (v) => v[0].properties[prop],
+              stroke: (v) =>
+                `${v[0].properties[prop]}` === selected ? "black" : "none",
               fillOpacity: (v) =>
                 !selected
                   ? 0.8
