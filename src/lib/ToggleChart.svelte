@@ -35,7 +35,7 @@
             },
             {
               y: (d) => 1,
-              fill: (d) => d.properties[prop],
+              fill: (d) => `${d.properties[prop]}`,
             }
           )
         ),
