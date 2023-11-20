@@ -6,7 +6,7 @@
 
 <button
   on:click|preventDefault={onClick}
-  class={`py-2 mx-2 my-1 hover:border-black border-solid border-2 border-black ${
+  class={`mx-2 my-1 p-1 hover:border-black border-solid border-1 border-black ${
     checked ? "opacity-100" : "opacity-30 hover:opacity-50"
   }`}
   style="background-image: url({imageUrl});"
@@ -19,6 +19,7 @@
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
+    background-origin: content-box;
     transition: none;
   }
   button:focus {

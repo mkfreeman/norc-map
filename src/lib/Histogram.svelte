@@ -11,13 +11,13 @@
   } from "d3";
 
   export let data = Array.from({ length: 100 }, (_, i) => i);
-  export let width = 250;
+  export let width = 200;
   export let height = 75;
   export let onUpdate = null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;
   onMount(() => {
-    const margin = { top: 10, right: 30, bottom: 35, left: 30 };
+    const margin = { top: 10, right: 0, bottom: 35, left: 30 };
 
     const svg = select(el)
       .append("svg")
@@ -49,8 +49,8 @@
       .attr("width", (d) => Math.max(0, x(d.x1) - x(d.x0) - 1))
       .attr("y", (d) => y(d.length))
       .attr("height", (d) => y(0) - y(d.length))
-      .attr("fill", "#69b3a2")
-      .attr("fill-opacity", 1);
+      .attr("fill", "rgb(104,175,252)")
+      .attr("fill-opacity", .8);
 
     const brush = brushX()
       .extent([

@@ -14,10 +14,10 @@
   <PlotWrapper
     {handleClick}
     options={{
-      width: 150,
+      width: 200,
       marginTop: 10,
-      color: {
-        type: "categorical",
+      color: {        
+        range: ["rgb(104,175,252)", "rgb(164 114 244)"]
       },
       marks: [
         Plot.barX(
