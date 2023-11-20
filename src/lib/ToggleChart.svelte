@@ -43,7 +43,7 @@
           frameAnchor: "top",
           textAnchor: "start",
           fontSize: 12,
-          dx: -70,
+          dx: -98,
           dy: -10,
         }),
         Plot.textX(

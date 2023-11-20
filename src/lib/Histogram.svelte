@@ -17,7 +17,7 @@
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;
   onMount(() => {
-    const margin = { top: 10, right: 0, bottom: 35, left: 30 };
+    const margin = { top: 15, right: 0, bottom: 25, left: 30 };
 
     const svg = select(el)
       .append("svg")
@@ -64,16 +64,16 @@
 
     svg
       .append("text") // X-axis label
-      .attr("x", width - margin.right)
-      .attr("y", height - 5)
-      .attr("text-anchor", "end")
+      .attr("x", 10)
+      .attr("y", 8)
+      .attr("text-anchor", "start")
       .attr("font-size", "10px")
       .text(label);
 
     svg
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(axisBottom(x).ticks(4));
+      .call(axisBottom(x).ticks(2));
 
     svg
       .append("g")

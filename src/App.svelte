@@ -77,9 +77,10 @@
 </script>
 
 <div class="w-full">
-  <h1 class="flex pb-2 text-2xl">Naturally Occuring Retirement Communities</h1>
+  <h1 class="flex pb-0 text-2xl">Naturally Occuring Retirement Communities</h1>
+  <p class="text-start border-b"><em>Use the controls below to explore the data in the map and table.</em></p>
   {#if data}
-    <div class="flex flex-wrap">
+    <div class="flex flex-wrap mt-3">
       {#each filterOptions as option}
         <ToggleChart
           prop={option.prop}
@@ -87,7 +88,9 @@
           selected={filters.find((d) => d.prop === option.prop)?.value}
           {data}
           handleClick={(event) =>
-            toggleFilter(option.prop, event.target.ariaLabel)}
+            !event.target.ariaLabel
+              ? null
+              : toggleFilter(option.prop, event.target.ariaLabel)}
         />
       {/each}
       {#if distances}
@@ -127,7 +130,7 @@
         />
       </form>
     </div>
-    <div class="w-[calc(100%-80px)] h-[calc(100vh-250px)]">
+    <div class="w-[calc(100%-80px)] h-[calc(50vh)]">
       <Leaflet view={initialView} zoom={11}>
         {#if mapData}
           {#each mapData as building (building.properties.id)}

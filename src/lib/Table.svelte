@@ -38,17 +38,27 @@
 </script>
 
 <div class="mb-10">
-  {#if tableData && tableData.length > 0}
-    <div class="border-t-2 mt-2 py-2 flex justify-between">
-      <div>
-        The table below shows each NORC, filtered by the controls above
-        (currently <strong>{tableData.length} rows</strong>). Click column headers to sort (currently
-        <em>{sortBy}</em>).
-      </div>
-      <button class="whitespace-nowrap" on:click={downloadCSV}
-        >Download table</button
-      >
+  <div class="border-t mt-2 py-2 flex justify-between text-start">
+    <div>
+      The table below shows each NORC, filtered by the controls above (currently <strong
+        >{tableData.length} rows</strong
+      >). Click column headers to sort (currently
+      <em>{sortBy}</em>).
     </div>
+    <div>
+    <button
+      on:click={downloadCSV}
+      type="button"
+      class="py-2.5 px-5 me-2 mb-2
+      text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg
+      border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10
+      focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800
+      dark:text-gray-400 dark:border-gray-600 dark:hover:text-white
+      dark:hover:bg-gray-700 whitespace-nowrap">Download Table</button
+    >
+    </div>
+  </div>
+  {#if tableData && tableData.length > 0}
     <div
       class="border-gray mt-1 overflow-x-auto"
       style="max-height: {maxHeight};"
@@ -59,10 +69,10 @@
           <tr>
             {#each Object.keys(tableData[0]) as key (key)}
               <th
-                class="cursor-pointer px-1 py-1 truncate select-none"
+                class="cursor-pointer px-1 py-1 border truncate select-none"
                 on:click={() => handleClick(key)}
               >
-                <div class="flex items-center">
+                <div class="flex items-center ">
                   {#if key === sortBy && sortOrder === 1}
                     <svg
                       class="w-4 h-4 ml-1 text-gray-600"
