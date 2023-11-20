@@ -16,7 +16,7 @@
 
   onMount(() => {
     if (map) {
-      polyLine = L.polyline(latLngs, { color: "black", opacity: 0.8 }).addTo(
+      polyLine = L.polyline(latLngs, { color: "black", weight: 2, opacity: 0.8 }).addTo(
         map
       );
     }

@@ -137,8 +137,8 @@
                   +building.properties.latitude,
                   +building.properties.longitude,
                 ]}
-                iconUrl="apartment.svg"
-                iconSize={[15, 100]}
+                radius={4}
+                fillColor="black"
               >
                 <Popup>{@html getPopupContent(building)}</Popup>
               </Marker>

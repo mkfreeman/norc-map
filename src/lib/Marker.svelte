@@ -39,7 +39,7 @@
           radius,
           fillColor,
           stroke: false,
-          fillOpacity: 1,
+          fillOpacity: .6,
         }).addTo(map);
   }
 
