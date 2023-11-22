@@ -7,27 +7,28 @@
     beforeUpdate,
     afterUpdate,
   } from "svelte";
-  import L from "leaflet";
+  import L, { type PointExpression } from "leaflet";
 
   export let latLng: L.LatLngExpression;
-  export let iconUrl;
-  export let iconSize = [50, 50];
+  export let iconUrl: string;
+  export let iconSize: PointExpression = [50, 50];
   export let radius = 4;
   export let fillColor = "blue";
 
-  let marker: L.CircleMarker | undefined;
+  let marker: L.CircleMarker | L.Marker | undefined;
   let markerElement: HTMLElement;
 
   const { getMap }: { getMap: () => L.Map | undefined } = getContext("map");
-  const map = getMap();
+  const map: L.Map | undefined = getMap();
 
   setContext("layer", {
-    // L.Marker inherits from L.Layer
     getLayer: () => marker,
   });
 
   function makeMarker() {
-    marker = iconUrl
+    marker = !map
+      ? undefined
+      : iconUrl
       ? L.marker(latLng, {
           icon: L.icon({
             iconUrl,
@@ -38,20 +39,12 @@
           radius,
           fillColor,
           stroke: false,
-          fillOpacity: 1,
+          fillOpacity: .6,
         }).addTo(map);
   }
 
   onMount(() => {
     if (map) makeMarker();
-  });
-
-  // TODO: this is redundant....
-  afterUpdate(() => {
-    if (marker && map) {
-      marker.remove();
-      makeMarker();
-    }
   });
 
   onDestroy(() => {
