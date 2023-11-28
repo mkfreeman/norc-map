@@ -17,7 +17,7 @@
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;
   onMount(() => {
-    const margin = { top: 15, right: 0, bottom: 25, left: 30 };
+    const margin = { top: 15, right: 0, bottom: 19, left: 20 };
 
     const svg = select(el)
       .append("svg")
@@ -50,7 +50,7 @@
       .attr("y", (d) => y(d.length))
       .attr("height", (d) => y(0) - y(d.length))
       .attr("fill", "rgb(104,175,252)")
-      .attr("fill-opacity", .8);
+      .attr("fill-opacity", 0.8);
 
     const brush = brushX()
       .extent([
@@ -64,10 +64,11 @@
 
     svg
       .append("text") // X-axis label
-      .attr("x", 10)
-      .attr("y", 8)
+      .attr("x", 2)
+      .attr("y", 9)
       .attr("text-anchor", "start")
-      .attr("font-size", "10px")
+      .attr("font-size", "12px")
+      .style("font-family", "system-ui, sans-serif")
       .text(label);
 
     svg
@@ -104,7 +105,7 @@
   });
 </script>
 
-<div bind:this={el} class="histogram" />
+<div bind:this={el} class="histogram mx-1" />
 
 <style>
   .histogram {

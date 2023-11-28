@@ -15,8 +15,6 @@
   let displayStations = true;
   let displayRoutes = true;
   let displayBuildings = true;
-  let distances: number[];
-  let numSeniors: number[];
   let data;
   let filters = [];
   const filterOptions = [
@@ -26,12 +24,16 @@
     { prop: "has_bench", label: "Has bench" },
   ];
 
+  const histogramOptions = [
+    { prop: "distance", label: "Distance" },
+    { prop: "Age 65+ Total", label: "Num. Seniors" },
+    { prop: "% of Seniors", label: "Pct. Seniors" },
+  ];
+
   onMount(async () => {
     data = await fetch("./output_paths_with_data.geojson").then((res) =>
       res.json()
     );
-    distances = data.features.map((d) => d.properties.distance);
-    numSeniors = data.features.map((d) => d.properties["Age 65+ Total"]);
   });
   // Map element visibility
   function toggleStations() {
@@ -98,20 +100,15 @@
               : toggleFilter(option.prop, event.target.ariaLabel)}
         />
       {/each}
-      {#if distances}
+    </div>
+    <div class="flex flex-wrap mt-3">
+      {#each histogramOptions as option}
         <Histogram
-          data={distances}
-          label="Distance →"
-          onUpdate={(range) => toggleFilter("distance", range)}
+          data={data.features.map((d) => d.properties[option.prop])}
+          label={`${option.label} →`}
+          onUpdate={(range) => toggleFilter(option.prop, range)}
         />
-      {/if}
-      {#if numSeniors}
-        <Histogram
-          data={numSeniors}
-          label="Num. Seniors →"
-          onUpdate={(range) => toggleFilter("Age 65+ Total", range)}
-        />
-      {/if}
+      {/each}
     </div>
   {/if}
   <div class="flex">
