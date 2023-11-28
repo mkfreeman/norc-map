@@ -1,6 +1,6 @@
 import pandas as pd
 import geopandas as gpd
-from geopy.distance import geodesic as GD
+from geopy.distance import distance
 from routingpy import Valhalla
 from shapely.geometry import Point, LineString, mapping
 import json
@@ -12,6 +12,7 @@ import json
 def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla_server_url='http://localhost:8002'):
     # Load the data
     norcs_df = pd.read_excel(norcs_file)
+    #norcs_df = norcs_df[norcs_df['Address'].str.contains('138 Bonis')]
     stops_df = pd.read_csv(stops_file)
 
     # Initialize the routing client with the Valhalla server
@@ -22,17 +23,20 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
 
     # Iterate through each NORC, and identify a subset of stops that
     # might be the closest just based on straight line distance
+    i = 0
     for _, norc in norcs_df.iterrows():
-        norc_point = (norc['longitude'], norc['latitude'])
+        i = i + 1
+        print(i)
+        norc_point = (norc['latitude'], norc['longitude'])
         print(norc['Address'])
         # Find stops within the specified distance
         nearby_stops = []
         closest_stop = None
         for _, stop in stops_df.iterrows():
-            stop_point = (stop['stop_lon'], stop['stop_lat'])
-            #print (norc_point, stop_point)
-            #print (GD(norc_point, stop_point).m)
-            if GD(norc_point, stop_point).m <= distance_threshold:
+            stop_point = (stop['stop_lat'], stop['stop_lon'])
+            #print (stop_point, norc_point, stop.stop_name, distance(norc_point, stop_point).m)
+            if distance(norc_point, stop_point).m <= distance_threshold:
+                #print(stop.stop_name)
                 nearby_stops.append(stop)
         print("Number of nearby stops: ", len(nearby_stops))
         # Compute walking distances and paths
@@ -42,8 +46,13 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
         shortest_path = None
         for stop in nearby_stops:
             try:
-                route = client.directions(locations=[norc_point, (stop['stop_lon'], stop['stop_lat'])], profile='foot', costing='pedestrian', format='geojson')
+                
+                route = client.directions(locations=[(norc_point[1], norc_point[0]), (stop['stop_lon'], stop['stop_lat'])], profile='foot', costing='pedestrian', format='geojson')
+                #print(stop.stop_name)
+                #print(route.distance)
                 if route.distance < shortest_distance:
+                    #print(shortest_distance)
+                    #print(norc.Address)
                     shortest_distance = route.distance
                     shortest_path = LineString(route.geometry)
                     closest_stop = stop
@@ -63,12 +72,11 @@ def calculate_shortest_paths(norcs_file, stops_file, distance_threshold,valhalla
 
     # add a building id to the file since there isn't one in the raw data
     final_gdf['id'] = range(1, len(final_gdf) + 1)
-    
     # Save as GeoJSON
     final_gdf.to_file('output.geojson', driver='GeoJSON')
 
 # Example usage: Note the 300, which indicates TTC stop candidates are
 # up to 300 meters from the building. This is rather large, but
 # will make sure every stop is included. 
-calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 300)
+calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/stops_with_shelter_bench_info.csv', 800)
 #calculate_shortest_paths('../raw_data/NORCs_Toronto_Geocoded.xlsx', '../public/ttc_subway_stations.csv', 800)
