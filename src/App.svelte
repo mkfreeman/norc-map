@@ -69,7 +69,10 @@
   }
   function getPopupContent(building) {
     return `
-      <em>Building: </em>${building.properties.Address}<br/>
+      <em>Building: </em>${building.properties.Address}<br/>      
+      <em>Pct. Seniors: </em>${d3.format(".1%")(
+        building.properties["% of Seniors"]
+      )}<br/>      
       <em>Stop</em>: ${building.properties.stop_name}<br/>
       <em>Distance</em>: ${building.properties.distance}m
     `;
@@ -78,7 +81,9 @@
 
 <div class="w-full">
   <h1 class="flex pb-0 text-2xl">Naturally Occuring Retirement Communities</h1>
-  <p class="text-start border-b"><em>Use the controls below to explore the data in the map and table.</em></p>
+  <p class="text-start border-b">
+    <em>Use the controls below to explore the data in the map and table.</em>
+  </p>
   {#if data}
     <div class="flex flex-wrap mt-3">
       {#each filterOptions as option}
