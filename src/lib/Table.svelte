@@ -177,7 +177,7 @@
           {#each tableData as item}
             <tr
               class={`cursor-pointer ${
-                item.index === selectedRow ? "bg-orange-300" : ""
+                item.index === selectedRow ? "bg-orange-300" : "hover:bg-slate-100"
               }`}
               on:click={() => rowClick(item)}
             >
