@@ -10,6 +10,8 @@
   import Table from "./lib/Table.svelte";
   import type { LatLngExpression } from "leaflet";
   import * as d3 from "d3";
+  import PlotWrapper from "./lib/PlotWrapper.svelte";
+  import * as Plot from "@observablehq/plot";
 
   const initialView: LatLngExpression = [43.70107, -79.397015];
   let displayStations = true;
@@ -52,9 +54,9 @@
       return typeof f.value === "string"
         ? `${d.properties[f.prop]}` == f.value
         : Array.isArray(f.value)
-        ? d.properties[f.prop] >= f.value[0] &&
-          d.properties[f.prop] <= f.value[1]
-        : false;
+          ? d.properties[f.prop] >= f.value[0] &&
+            d.properties[f.prop] <= f.value[1]
+          : false;
     });
   });
 
@@ -190,6 +192,62 @@
         "Has Bench": d.properties.has_bench,
       }))}
       sortBy="Distance"
+    />
+  {/if}
+  <h1 class="flex pb-0 pt-2 text-2xl border-t">Stops</h1>
+  <p class="text-start m0"><em>Top 40 stops by number of seniors served</em></p>
+  {#if data}
+    <PlotWrapper
+      options={{
+        marks: [
+          Plot.barX(
+            data.features,
+            Plot.stackX({
+              ...Plot.groupY(
+                { x: "sum", reverse: true },
+                {
+                  y: (d) => `${d.properties.stop_name} (#${d.properties.id})`,
+                  x: (d) => d.properties["Age 65+ Total"],
+                  z: (d) => d.properties.Address,
+                  sort: { y: "x", limit: 40, reverse: true },
+                  stroke: "white",
+                  fill: (d) =>
+                    d.properties.has_shelter_with_bench ||
+                    d.properties.has_bench ||
+                    d.properties.has_shelter
+                      ? "Has shelter/bench"
+                      : "No shelter/bench",
+                  channels: {
+                    NORC: (d) => d[0].properties.Address,
+                    "Has bench or shelter": (d) =>
+                      d[0].properties.has_shelter_with_bench ||
+                      d[0].properties.has_bench ||
+                      d[0].properties.has_shelter,
+                  },
+                  order: "x",
+                  tip: {
+                    format: {
+                      NORC: true,
+                      y: false,
+                      fill: false,
+                    },
+                  },
+                }
+              ),
+              reverse: true,
+            })
+          ),
+        ],
+        x: {
+          label: "Number of seniors served",
+        },
+        marginLeft: 300,
+        marginTop: 0,
+        color: {
+          legend: true,
+          range: ["rgb(104,175,252)", "rgb(164 114 244)"],
+        },
+      }}
     />
   {/if}
 </div>
