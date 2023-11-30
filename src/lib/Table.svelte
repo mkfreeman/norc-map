@@ -54,7 +54,7 @@
       NORCs filtered by the controls above and search below (currently <strong
         >{tableData.length} rows</strong
       >). Click column headers to sort (currently
-      <em>{sortBy}</em>).
+      <em>{sortBy}.</em>). Click a row to zoom the map.
     </div>
     <div>
       <button

@@ -8,16 +8,18 @@
     bin,
     brushX,
     extent,
+    format
   } from "d3";
 
   export let data = Array.from({ length: 100 }, (_, i) => i);
   export let width = 200;
   export let height = 75;
+  export let tickFormat = format(".2s")
   export let onUpdate = null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;
   onMount(() => {
-    const margin = { top: 15, right: 0, bottom: 19, left: 20 };
+    const margin = { top: 15, right: 30, bottom: 30, left: 30 };
 
     const svg = select(el)
       .append("svg")
@@ -74,12 +76,12 @@
     svg
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(axisBottom(x).ticks(2));
+      .call(axisBottom(x).ticks(4).tickFormat(tickFormat));
 
     svg
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
-      .call(axisLeft(y).ticks(1));
+      .call(axisLeft(y).ticks(2));
 
     function brushed(event) {
       if (event.selection) {

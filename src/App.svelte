@@ -30,9 +30,17 @@
   ];
 
   const histogramOptions = [
-    { prop: "distance", label: "Distance" },
-    { prop: "Age 65+ Total", label: "Num. Seniors" },
-    { prop: "% of Seniors", label: "Pct. Seniors" },
+    { prop: "distance", label: "Distance", tickFormat: d3.format(".2s") },
+    {
+      prop: "Age 65+ Total",
+      label: "Num. Seniors",
+      tickFormat: d3.format(".2s"),
+    },
+    {
+      prop: "% of Seniors",
+      label: "Pct. Seniors",
+      tickFormat: d3.format(".0%"),
+    },
   ];
 
   onMount(async () => {
@@ -121,6 +129,7 @@
           data={data.features.map((d) => d.properties[option.prop])}
           label={`${option.label} →`}
           onUpdate={(range) => toggleFilter(option.prop, range)}
+          tickFormat={option.tickFormat}
         />
       {/each}
     </div>
