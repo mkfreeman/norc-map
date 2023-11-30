@@ -13,11 +13,14 @@
   import PlotWrapper from "./lib/PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
 
-  const initialView: LatLngExpression = [43.70107, -79.397015];
+  let initialView: LatLngExpression = [43.70107, -79.397015];
+  let zoom: number = 11;
   let displayStations = true;
   let displayRoutes = true;
   let displayBuildings = true;
   let data;
+  let currentZoom: LatLngExpression;
+  let selectedIndex: number;
   let filters = [];
   const filterOptions = [
     { prop: "wheelchair_boarding", label: "Wheelchair boarding" },
@@ -60,6 +63,15 @@
     });
   });
 
+  // Click functionality for zooming the map
+  $: view = selectedIndex
+    ? [
+        mapData[selectedIndex].properties.latitude,
+        mapData[selectedIndex].properties.longitude,
+      ]
+    : initialView;
+  $: zoom = selectedIndex ? 14 : 11;
+
   function toggleFilter(prop, value) {
     if (
       filters.find(
@@ -76,7 +88,7 @@
       <em>Building: </em>${building.properties.Address}<br/>      
       <em>Pct. Seniors: </em>${d3.format(".1%")(
         building.properties["% of Seniors"]
-      )}<br/>      
+      )}<br/>
       <em>Stop</em>: ${building.properties.stop_name}<br/>
       <em>Distance</em>: ${building.properties.distance}m
     `;
@@ -135,9 +147,9 @@
       </form>
     </div>
     <div class="w-[calc(100%-80px)] h-[calc(50vh)]">
-      <Leaflet view={initialView} zoom={11}>
+      <Leaflet {view} {zoom}>
         {#if mapData}
-          {#each mapData as building (building.properties.id)}
+          {#each mapData as building, index (building.properties.id)}
             {#if displayBuildings}
               <Marker
                 latLng={[
@@ -147,7 +159,9 @@
                 radius={4}
                 fillColor="black"
               >
-                <Popup>{@html getPopupContent(building)}</Popup>
+                <Popup startOpen={index === selectedIndex}
+                  >{@html getPopupContent(building)}</Popup
+                >
               </Marker>
             {/if}
             {#if displayStations}
@@ -179,7 +193,7 @@
   </div>
   {#if mapData}
     <Table
-      items={mapData.map((d) => ({
+      items={mapData.map((d, index) => ({
         Address: d.properties.Address,
         "Nearest Stop": d.properties.stop_name,
         Distance: +d.properties.distance,
@@ -190,13 +204,22 @@
         "Has Shelter": d.properties.has_shelter,
         "Shelter + Bench": d.properties.has_shelter_with_bench,
         "Has Bench": d.properties.has_bench,
+        latitude: +d.properties.latitude,
+        longitude: +d.properties.longitude,
+        index,
       }))}
       sortBy="Distance"
+      rowClick={(row) =>
+        selectedIndex === row.index
+          ? (selectedIndex = null)
+          : (selectedIndex = row.index)}
+      selectedRow={selectedIndex}
     />
   {/if}
   <h1 class="flex pb-0 pt-2 text-2xl border-t">Stops</h1>
   <p class="text-start m0"><em>Top 40 stops by number of seniors served</em></p>
   {#if data}
+    <!-- TODO: move this to a component -->
     <PlotWrapper
       options={{
         marks: [

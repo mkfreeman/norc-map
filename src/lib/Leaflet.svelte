@@ -52,7 +52,9 @@
     if (bounds) {
       map.fitBounds(bounds);
     } else if (view && zoom) {
-      map.setView(view, zoom);
+      map.setView(view, zoom, {
+        animate: true,
+      });
     }
   }
 </script>

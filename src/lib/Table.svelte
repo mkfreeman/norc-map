@@ -6,7 +6,9 @@
 
   export let items = [];
   export let sortBy = "";
+  export let selectedRow;
   export let searchTerm = "";
+  export let rowClick = () => {};
   const handleClick = (key: string) => {
     if (sortBy === key) sortOrder *= -1;
     else $: sortBy = key;
@@ -15,6 +17,7 @@
   $: tableData = [...items]
     .filter((item) =>
       Object.values(item)
+        .filter((d) => typeof d === "string")
         .join(" ")
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
@@ -24,6 +27,7 @@
       if (a[sortBy] < b[sortBy]) return -sortOrder;
       return 0;
     });
+
   function downloadCSV() {
     const header = Object.keys(tableData[0]).join(",") + "\n";
     const csv =
@@ -171,7 +175,12 @@
         <!-- Table Body -->
         <tbody>
           {#each tableData as item}
-            <tr>
+            <tr
+              class={`cursor-pointer ${
+                item.index === selectedRow ? "bg-orange-300" : ""
+              }`}
+              on:click={() => rowClick(item)}
+            >
               {#each Object.values(item) as value}
                 <td class="border px-1 py-1 truncate" style="max-width: 240px"
                   >{value}</td
