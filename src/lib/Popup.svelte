@@ -4,7 +4,7 @@
 
   let popup: L.Popup | undefined;
   let popupElement: HTMLElement;
-
+  let isOpen = false;
   export let startOpen = false;
 
   const { getLayer }: { getLayer: () => L.Layer | undefined } =
@@ -12,18 +12,18 @@
   const layer = getLayer();
 
   onMount(() => {
-    popup = L.popup().setContent(popupElement);    
+    popup = L.popup().setContent(popupElement);
     if (layer) {
       layer.bindPopup(popup);
-      layer.on("popupopen", () => (open = true));
-      layer.on("popupclose", () => (open = false));
+      layer.on("popupopen", () => (isOpen = true));
+      layer.on("popupclose", () => (isOpen = false));
       if (startOpen) layer?.openPopup();
     }
   });
 
   $: {
     if (startOpen && layer) layer?.openPopup();
-	else if (layer) layer.closePopup();
+    else if (layer) layer.closePopup();
   }
 
   onDestroy(() => {
@@ -34,7 +34,7 @@
 </script>
 
 <div use={startOpen} bind:this={popupElement}>
-  {#if open}
+  {#if isOpen}
     <slot />
   {/if}
 </div>
