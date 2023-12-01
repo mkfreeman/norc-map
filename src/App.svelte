@@ -69,8 +69,8 @@
   }
   function getPopupContent(building) {
     return `
-      <em>Building: </em>${building.properties.Address}<br/>
-      <em>Stop</em>: ${building.properties.stop_name}<br/>
+      <em>Building: </em><a target="_blank" href="http://maps.google.com/maps?q=&layer=c&cbll=${building.properties.latitude},${building.properties.longitude}&cbp=11,0,0,0,0">${building.properties.Address}</a><br/>
+      <em>Stop</em>: <a target="_blank" href="http://maps.google.com/maps?q=&layer=c&cbll=${building.properties.stop_lat},${building.properties.stop_lon}&cbp=11,0,0,0,0">${building.properties.stop_name}</a><br/>
       <em>Distance</em>: ${building.properties.distance}m
     `;
   }
@@ -159,6 +159,7 @@
               </Marker>
             {/if}
             {#if displayRoutes}
+	    {#if building.geometry}
               <PolyLine
                 latLngs={building.geometry.coordinates.map((d) => [
                   +d[1],
@@ -168,6 +169,7 @@
                 <Popup>{@html getPopupContent(building)}</Popup>
               </PolyLine>
             {/if}
+	    {/if}
           {/each}
         {/if}
       </Leaflet>
