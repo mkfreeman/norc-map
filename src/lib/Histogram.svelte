@@ -8,16 +8,18 @@
     bin,
     brushX,
     extent,
+    format
   } from "d3";
 
   export let data = Array.from({ length: 100 }, (_, i) => i);
   export let width = 200;
   export let height = 75;
+  export let tickFormat = format(".2s")
   export let onUpdate = null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;
   onMount(() => {
-    const margin = { top: 15, right: 0, bottom: 25, left: 30 };
+    const margin = { top: 15, right: 30, bottom: 30, left: 30 };
 
     const svg = select(el)
       .append("svg")
@@ -50,7 +52,7 @@
       .attr("y", (d) => y(d.length))
       .attr("height", (d) => y(0) - y(d.length))
       .attr("fill", "rgb(104,175,252)")
-      .attr("fill-opacity", .8);
+      .attr("fill-opacity", 0.8);
 
     const brush = brushX()
       .extent([
@@ -64,21 +66,22 @@
 
     svg
       .append("text") // X-axis label
-      .attr("x", 10)
-      .attr("y", 8)
+      .attr("x", 2)
+      .attr("y", 9)
       .attr("text-anchor", "start")
-      .attr("font-size", "10px")
+      .attr("font-size", "12px")
+      .style("font-family", "system-ui, sans-serif")
       .text(label);
 
     svg
       .append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(axisBottom(x).ticks(2));
+      .call(axisBottom(x).ticks(4).tickFormat(tickFormat));
 
     svg
       .append("g")
       .attr("transform", `translate(${margin.left},0)`)
-      .call(axisLeft(y).ticks(1));
+      .call(axisLeft(y).ticks(2));
 
     function brushed(event) {
       if (event.selection) {
@@ -104,7 +107,7 @@
   });
 </script>
 
-<div bind:this={el} class="histogram" />
+<div bind:this={el} class="histogram mx-1" />
 
 <style>
   .histogram {

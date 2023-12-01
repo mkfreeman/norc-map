@@ -67,10 +67,10 @@
           )
         ),
       ],
-      marginBottom: 10,
+      marginBottom: 0,
       x: { label, axis: null },
       y: { axis: null },
-      height: 50,
+      height: 55,
       style: { cursor: "pointer" },
     }}
   />
