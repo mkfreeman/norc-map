@@ -59,6 +59,11 @@
     displayBuildings = !displayBuildings;
   }
 
+  // url generation based on this answer: https://stackoverflow.com/questions/387942/google-street-view-url
+  function getStreetViewUrl(lat, lng) {
+    return `http://maps.google.com/maps?q=&layer=c&cbll=${lat},${lng}&cbp=11,0,0,0,0`;
+  } 
+
   // Data filters
   $: mapData = data?.features.filter((d) => {
     return filters.every((f) => {
@@ -93,10 +98,11 @@
   }
   function getPopupContent(building) {
     return `
-      <em>Building: </em><a target="_blank" href="http://maps.google.com/maps?q=&layer=c&cbll=${building.properties.latitude},${building.properties.longitude}&cbp=11,0,0,0,0">${building.properties.Address}</a><br/>
+      <em>Building: </em><a target="_blank" href="${getStreetViewUrl(building.properties.latitude, building.properties.longitude)}">${building.properties.Address}</a><br/>
       <em>Pct. Seniors: </em>${d3.format(".1%")(
         building.properties["% of Seniors"]
-      <em>Stop</em>: <a target="_blank" href="http://maps.google.com/maps?q=&layer=c&cbll=${building.properties.stop_lat},${building.properties.stop_lon}&cbp=11,0,0,0,0">${building.properties.stop_name}</a><br/>
+      )}<br/>
+<em>Stop</em>: <a target="_blank" href="${getStreetViewUrl(building.properties.stop_lat, building.properties.stop_lon)}">${building.properties.stop_name}</a><br/>
       <em>Distance</em>: ${building.properties.distance}m
     `;
   }
