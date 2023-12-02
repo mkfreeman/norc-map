@@ -44,7 +44,7 @@
   ];
 
   onMount(async () => {
-    data = await fetch("./output_paths_with_data.geojson").then((res) =>
+    data = await fetch("./norcs_with_closest_stops_valhalla.geojson").then((res) =>
       res.json()
     );
   });

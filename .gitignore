@@ -26,6 +26,9 @@ dist-ssr
 # Valhalla stuff, in case you run the server from inside the repo
 */custom_files/
 
+# Files for Google API caching
+data_processing/tmp/
+
 # EMACS stuff
 *~
 \#*\#
