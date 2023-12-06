@@ -13,6 +13,7 @@
   import PlotWrapper from "./lib/PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
   import BarChart from "./lib/BarChart.svelte";
+  import CellChart from "./lib/CellChart.svelte";
 
   let initialView: LatLngExpression = [43.70107, -79.397015];
   let zoom: number = 11;
@@ -242,39 +243,50 @@
   <h1 class="flex pb-0 pt-2 text-2xl border-t">Stops</h1>
   <p class="text-start m0"><em>Top 40 stops by number of seniors served</em></p>
   {#if data}
-
-   <div class="flex">
-    <BarChart
-      data={data.features}
-      getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
-      getX={(d) => d.properties["Age 65+ Total"]}
-      getZ={(d) => d.properties.Address}
-      getFill={(d) =>
-        d.properties.has_shelter_with_bench}
-      title="Has shelter with bench"
-    />
-    <BarChart
-      data={data.features}
-      getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
-      getX={(d) => d.properties["Age 65+ Total"]}
-      getZ={(d) => d.properties.Address}
-      getFill={(d) =>
-        d.properties.has_shelter }
-          marginLeft={0}
-          width={300}
-      title={"Has shelter"}
-    />
-    <BarChart
-      data={data.features}
-      getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
-      getX={(d) => d.properties["Age 65+ Total"]}
-      getZ={(d) => d.properties.Address}
-      getFill={(d) =>
-        d.properties.has_bench }
-          marginLeft={0}
-          width={300}
-      title={"Has bench only"}
-    />
+    <div class="flex">
+      <BarChart
+        data={data.features}
+        getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
+        getX={(d) => d.properties["Age 65+ Total"]}
+        getZ={(d) => d.properties.Address}
+        getFill={(d) => d.properties.has_shelter_with_bench}
+        title="Has shelter with bench"
+      />
+      <BarChart
+        data={data.features}
+        getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
+        getX={(d) => d.properties["Age 65+ Total"]}
+        getZ={(d) => d.properties.Address}
+        getFill={(d) => d.properties.has_shelter}
+        marginLeft={0}
+        width={300}
+        title={"Has shelter"}
+      />
+      <BarChart
+        data={data.features}
+        getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
+        getX={(d) => d.properties["Age 65+ Total"]}
+        getZ={(d) => d.properties.Address}
+        getFill={(d) => d.properties.has_bench}
+        marginLeft={0}
+        width={300}
+        title={"Has bench only"}
+      />
+    </div>
+  {/if}
+  {#if data}
+    <div class="flex mb-16">
+      <CellChart
+        data={data.features}
+        x="has_shelter"
+        y="has_shelter_with_bench"
+      />
+      <CellChart data={data.features} x="has_shelter" y="has_bench" />
+      <CellChart
+        data={data.features}
+        x="has_shelter_with_bench"
+        y="has_bench"
+      />
     </div>
   {/if}
 </div>
