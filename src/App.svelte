@@ -12,6 +12,7 @@
   import * as d3 from "d3";
   import PlotWrapper from "./lib/PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
+  import BarChart from "./lib/BarChart.svelte";
 
   let initialView: LatLngExpression = [43.70107, -79.397015];
   let zoom: number = 11;
@@ -44,8 +45,8 @@
   ];
 
   onMount(async () => {
-    data = await fetch("./norcs_with_closest_stops_valhalla.geojson").then((res) =>
-      res.json()
+    data = await fetch("./norcs_with_closest_stops_valhalla.geojson").then(
+      (res) => res.json()
     );
   });
   // Map element visibility
@@ -62,7 +63,7 @@
   // url generation based on this answer: https://stackoverflow.com/questions/387942/google-street-view-url
   function getStreetViewUrl(lat, lng) {
     return `http://maps.google.com/maps?q=&layer=c&cbll=${lat},${lng}&cbp=11,0,0,0,0`;
-  } 
+  }
 
   // Data filters
   $: mapData = data?.features.filter((d) => {
@@ -98,11 +99,17 @@
   }
   function getPopupContent(building) {
     return `
-      <em>Building: </em><a target="_blank" href="${getStreetViewUrl(building.properties.latitude, building.properties.longitude)}">${building.properties.Address}</a><br/>
+      <em>Building: </em><a target="_blank" href="${getStreetViewUrl(
+        building.properties.latitude,
+        building.properties.longitude
+      )}">${building.properties.Address}</a><br/>
       <em>Pct. Seniors: </em>${d3.format(".1%")(
         building.properties["% of Seniors"]
       )}<br/>
-<em>Stop</em>: <a target="_blank" href="${getStreetViewUrl(building.properties.stop_lat, building.properties.stop_lon)}">${building.properties.stop_name}</a><br/>
+<em>Stop</em>: <a target="_blank" href="${getStreetViewUrl(
+      building.properties.stop_lat,
+      building.properties.stop_lon
+    )}">${building.properties.stop_name}</a><br/>
       <em>Distance</em>: ${building.properties.distance}m
     `;
   }
@@ -191,17 +198,17 @@
               </Marker>
             {/if}
             {#if displayRoutes}
-	    {#if building.geometry}
-              <PolyLine
-                latLngs={building.geometry.coordinates.map((d) => [
-                  +d[1],
-                  +d[0],
-                ])}
-              >
-                <Popup>{@html getPopupContent(building)}</Popup>
-              </PolyLine>
+              {#if building.geometry}
+                <PolyLine
+                  latLngs={building.geometry.coordinates.map((d) => [
+                    +d[1],
+                    +d[0],
+                  ])}
+                >
+                  <Popup>{@html getPopupContent(building)}</Popup>
+                </PolyLine>
+              {/if}
             {/if}
-	    {/if}
           {/each}
         {/if}
       </Leaflet>
@@ -235,58 +242,39 @@
   <h1 class="flex pb-0 pt-2 text-2xl border-t">Stops</h1>
   <p class="text-start m0"><em>Top 40 stops by number of seniors served</em></p>
   {#if data}
-    <!-- TODO: move this to a component -->
-    <PlotWrapper
-      options={{
-        marks: [
-          Plot.barX(
-            data.features,
-            Plot.stackX({
-              ...Plot.groupY(
-                { x: "sum", reverse: true },
-                {
-                  y: (d) => `${d.properties.stop_name} (#${d.properties.id})`,
-                  x: (d) => d.properties["Age 65+ Total"],
-                  z: (d) => d.properties.Address,
-                  sort: { y: "x", limit: 40, reverse: true },
-                  stroke: "white",
-                  fill: (d) =>
-                    d.properties.has_shelter_with_bench ||
-                    d.properties.has_bench ||
-                    d.properties.has_shelter
-                      ? "Has shelter/bench"
-                      : "No shelter/bench",
-                  channels: {
-                    NORC: (d) => d[0].properties.Address,
-                    "Has bench or shelter": (d) =>
-                      d[0].properties.has_shelter_with_bench ||
-                      d[0].properties.has_bench ||
-                      d[0].properties.has_shelter,
-                  },
-                  order: "x",
-                  tip: {
-                    format: {
-                      NORC: true,
-                      y: false,
-                      fill: false,
-                    },
-                  },
-                }
-              ),
-              reverse: true,
-            })
-          ),
-        ],
-        x: {
-          label: "Number of seniors served",
-        },
-        marginLeft: 300,
-        marginTop: 0,
-        color: {
-          legend: true,
-          range: ["rgb(104,175,252)", "rgb(164 114 244)"],
-        },
-      }}
+
+   <div class="flex">
+    <BarChart
+      data={data.features}
+      getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
+      getX={(d) => d.properties["Age 65+ Total"]}
+      getZ={(d) => d.properties.Address}
+      getFill={(d) =>
+        d.properties.has_shelter_with_bench}
+      title="Has shelter with bench"
     />
+    <BarChart
+      data={data.features}
+      getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
+      getX={(d) => d.properties["Age 65+ Total"]}
+      getZ={(d) => d.properties.Address}
+      getFill={(d) =>
+        d.properties.has_shelter }
+          marginLeft={0}
+          width={300}
+      title={"Has shelter"}
+    />
+    <BarChart
+      data={data.features}
+      getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
+      getX={(d) => d.properties["Age 65+ Total"]}
+      getZ={(d) => d.properties.Address}
+      getFill={(d) =>
+        d.properties.has_bench }
+          marginLeft={0}
+          width={300}
+      title={"Has bench only"}
+    />
+    </div>
   {/if}
 </div>
