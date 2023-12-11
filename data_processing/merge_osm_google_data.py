@@ -29,10 +29,13 @@ def merge_datasets(open_street_maps_file, google_maps_file):
         selected_feature = None
         source = None
 
+        # see issue 31. I decided to remove this critera since Google
+        # is buggy
         if osm_feature['properties']['stop_id'] == gmaps_feature['properties']['stop_id']:
             selected_feature = gmaps_feature
             source = 'Google'
-        else:
+        #else:
+        if True:
             osm_distance = osm_feature['properties']['distance']
             gmaps_distance = gmaps_feature['properties']['distance']
             distance_diff = abs(osm_distance - gmaps_distance)

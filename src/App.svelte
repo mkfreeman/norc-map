@@ -111,7 +111,8 @@
       building.properties.stop_lat,
       building.properties.stop_lon
     )}">${building.properties.stop_name}</a><br/>
-      <em>Distance</em>: ${building.properties.distance}m
+      <em>Distance</em>: ${building.properties.distance}m<br/>
+      <em>Source</em>: ${building.properties.source}
     `;
   }
 </script>
