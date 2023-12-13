@@ -2,7 +2,7 @@ import json
 import argparse
 
 # List of properties to keep
-properties_to_keep = ['id',"Address", "stop_name", "distance", "Age 65+ Total", "All_Persons", "% of Seniors", "wheelchair_boarding", "latitude", "longitude", "amenity"]
+properties_to_keep = ['id',"Address", "stop_name", "distance", "Age 65+ Total", "All_Persons", "% of Seniors", "wheelchair_boarding", "latitude", "longitude", "stop_lat", "stop_lon", "amenity", "source"]
 
 # This function will keep only the properties listed above, and
 # it also does the correction to the stop amenities and wheelchair properties
