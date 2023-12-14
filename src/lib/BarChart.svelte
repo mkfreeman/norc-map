@@ -50,9 +50,11 @@
           {
             x: "count",
             text: "count",
+            ariaLabel: (v) => v[0],
           },
           {
             y: getY,
+            ariaLabel: getY,
             dx: 2,
             textAnchor: "start",
             sort: {
@@ -85,6 +87,7 @@
     },
     style: {
       cursor: "pointer",
+      userSelect: "none",
     },
   }}
 />
