@@ -315,6 +315,7 @@
                   y: false,
                   fx: false,
                   x: false,
+                  fill: false
                 },
               },
               stroke: "white",
