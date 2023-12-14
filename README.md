@@ -21,7 +21,7 @@ Furthermore, these data sets are inconsistent. Consider the definitions above an
 
 ![image](https://github.com/mkfreeman/norc-map/assets/110122/157fb011-1067-4462-ab26-59776354da2a)
 
-It does not make sense, for example, that has_shelter_with_bench is true in 48 instances where it is has_shelter=false.
+It does not make sense, for example, that has_shelter_with_bench is true for 48 TTC stops where those same stops are marked has_shelter=false based on the other dataset. 
 
 This is noted in more detail here: https://github.com/mkfreeman/norc-map/issues/28#issuecomment-1850468479. Furthermore, at times the datasets do not actually reflect what is shown on Google Streetview (which, we acknowledge, may be out of date, or the dataset could be out of date). 
 
