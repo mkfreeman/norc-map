@@ -167,6 +167,13 @@
                     </svg>
                   {/if}
                   {key}
+                  <svg
+                    class="w-4 h-4 ml-1 opacity-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                  </svg>
                 </div>
               </th>
             {/each}
@@ -177,7 +184,7 @@
           {#each tableData as item}
             <tr
               class={`cursor-pointer ${
-                item.index === selectedRow ? "bg-orange-300" : "hover:bg-slate-100"
+                item.id === selectedRow ? "bg-orange-300" : "hover:bg-slate-100"
               }`}
               on:click={() => rowClick(item)}
             >

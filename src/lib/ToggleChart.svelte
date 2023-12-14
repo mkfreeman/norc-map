@@ -16,7 +16,7 @@
       marginTop: 10,
       color: {
         range: ["rgb(104,175,252)", "rgb(164 114 244)"],
-        domain: prop === "wheelchair_boarding" ? ["1", "2"]: ["true", "false"],
+        domain: prop === "wheelchair_boarding" ? ["Some", "None"]: ["true", "false"],
       },
       marks: [
         Plot.barX(

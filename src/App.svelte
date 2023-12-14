@@ -24,12 +24,6 @@
   let currentZoom: LatLngExpression;
   let selectedIndex: number;
   let filters = [];
-  const filterOptions = [
-    { prop: "wheelchair_boarding", label: "Wheelchair boarding" },
-    { prop: "has_shelter", label: "Has shelter" },
-    { prop: "has_shelter_with_bench", label: "Has shelter with bench" },
-    { prop: "has_bench", label: "Has bench" },
-  ];
 
   const histogramOptions = [
     { prop: "distance", label: "Distance", tickFormat: d3.format(".2s") },
@@ -46,7 +40,7 @@
   ];
 
   onMount(async () => {
-    data = await fetch("./norcs_with_closest_stops_merged.geojson").then(
+    data = await fetch("./norcs_with_closest_stops_merged_new.geojson").then(
       (res) => res.json()
     );
   });
@@ -70,7 +64,7 @@
   $: mapData = data?.features.filter((d) => {
     return filters.every((f) => {
       return typeof f.value === "string"
-        ? `${d.properties[f.prop]}` == f.value
+        ? `${d.properties[f.prop]}` == (f.value === "None" ? "null" : f.value)
         : Array.isArray(f.value)
           ? d.properties[f.prop] >= f.value[0] &&
             d.properties[f.prop] <= f.value[1]
@@ -81,8 +75,8 @@
   // Click functionality for zooming the map
   $: view = selectedIndex
     ? [
-        mapData[selectedIndex].properties.latitude,
-        mapData[selectedIndex].properties.longitude,
+        mapData[selectedIndex + 1].properties.latitude, // TODO: 0 index the id
+        mapData[selectedIndex + 1].properties.longitude,
       ]
     : initialView;
   $: zoom = selectedIndex ? 14 : 11;
@@ -112,6 +106,7 @@
       building.properties.stop_lon
     )}">${building.properties.stop_name}</a><br/>
       <em>Distance</em>: ${building.properties.distance}m<br/>
+      <em>Amenity</em>: ${building.properties.amenity || "None"}<br/>
       <em>Source</em>: ${building.properties.source}
     `;
   }
@@ -124,18 +119,27 @@
   </p>
   {#if data}
     <div class="flex flex-wrap mt-3">
-      {#each filterOptions as option}
-        <ToggleChart
-          prop={option.prop}
-          label={option.label}
-          selected={filters.find((d) => d.prop === option.prop)?.value}
-          {data}
-          handleClick={(event) =>
-            !event.target.ariaLabel
-              ? null
-              : toggleFilter(option.prop, event.target.ariaLabel)}
-        />
-      {/each}
+      <ToggleChart
+        prop={"wheelchair_boarding"}
+        label={"Wheelchair boarding"}
+        selected={filters.find((d) => d.prop === "wheelchair_boarding")?.value}
+        {data}
+        handleClick={(event) =>
+          !event.target.ariaLabel
+            ? null
+            : toggleFilter("wheelchair_boarding", event.target.ariaLabel)}
+      />
+      <BarChart
+        data={data.features}
+        y={"amenity"}
+        marginLeft={200}
+        width={300}
+        selected={filters.find((d) => d.prop === "amenity")?.value}
+        handleClick={(event) =>
+          !event.target.ariaLabel
+            ? null
+            : toggleFilter("amenity", event.target.ariaLabel)}
+      />
     </div>
     <div class="flex flex-wrap mt-3">
       {#each histogramOptions as option}
@@ -182,7 +186,7 @@
                 radius={4}
                 fillColor="black"
               >
-                <Popup startOpen={index === selectedIndex}
+                <Popup startOpen={index + 1 === selectedIndex}
                   >{@html getPopupContent(building)}</Popup
                 >
               </Marker>
@@ -218,76 +222,16 @@
   </div>
   {#if mapData}
     <Table
-      items={mapData.map((d, index) => ({
-        Address: d.properties.Address,
-        "Nearest Stop": d.properties.stop_name,
-        Distance: +d.properties.distance,
-        "# Seniors": d.properties["Age 65+ Total"],
-        "# People": d.properties.All_Persons,
-        "% seniors": d3.format(".1%")(d.properties["% of Seniors"]),
-        "Wheelchair Boarding": d.properties.wheelchair_boarding,
-        "Has Shelter": d.properties.has_shelter,
-        "Shelter + Bench": d.properties.has_shelter_with_bench,
-        "Has Bench": d.properties.has_bench,
-        latitude: +d.properties.latitude,
-        longitude: +d.properties.longitude,
-        index,
+      items={mapData.map((d) => ({
+        ...d.properties,
+        "% of Seniors": d3.format(".1%")(d.properties["% of Seniors"]),
       }))}
       sortBy="Distance"
       rowClick={(row) =>
-        selectedIndex === row.index
+        selectedIndex === row.id
           ? (selectedIndex = null)
-          : (selectedIndex = row.index)}
+          : (selectedIndex = row.id)}
       selectedRow={selectedIndex}
     />
-  {/if}
-  <h1 class="flex pb-0 pt-2 text-2xl border-t">Stops</h1>
-  <p class="text-start m0"><em>Top 40 stops by number of seniors served</em></p>
-  {#if data}
-    <div class="flex">
-      <BarChart
-        data={data.features}
-        getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
-        getX={(d) => d.properties["Age 65+ Total"]}
-        getZ={(d) => d.properties.Address}
-        getFill={(d) => d.properties.has_shelter_with_bench}
-        title="Has shelter with bench"
-      />
-      <BarChart
-        data={data.features}
-        getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
-        getX={(d) => d.properties["Age 65+ Total"]}
-        getZ={(d) => d.properties.Address}
-        getFill={(d) => d.properties.has_shelter}
-        marginLeft={0}
-        width={300}
-        title={"Has shelter"}
-      />
-      <BarChart
-        data={data.features}
-        getY={(d) => `${d.properties.stop_name} (#${d.properties.id})`}
-        getX={(d) => d.properties["Age 65+ Total"]}
-        getZ={(d) => d.properties.Address}
-        getFill={(d) => d.properties.has_bench}
-        marginLeft={0}
-        width={300}
-        title={"Has bench only"}
-      />
-    </div>
-  {/if}
-  {#if data}
-    <div class="flex mb-16">
-      <CellChart
-        data={data.features}
-        x="has_shelter"
-        y="has_shelter_with_bench"
-      />
-      <CellChart data={data.features} x="has_shelter" y="has_bench" />
-      <CellChart
-        data={data.features}
-        x="has_shelter_with_bench"
-        y="has_bench"
-      />
-    </div>
-  {/if}
+  {/if}  
 </div>
