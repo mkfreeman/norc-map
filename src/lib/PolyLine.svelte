@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy, getContext, setContext } from "svelte";
   import L from "leaflet";
-  export let latLngs: [L.LatLngExpression];
+  export let latLngs: number[][];
 
   let polyLine: L.Polyline | undefined;
   let polyLineElement: HTMLElement;
