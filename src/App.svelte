@@ -13,7 +13,6 @@
   import PlotWrapper from "./lib/PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
   import BarChart from "./lib/BarChart.svelte";
-  import CellChart from "./lib/CellChart.svelte";
 
   let initialView: LatLngExpression = [43.70107, -79.397015];
   let zoom: number = 11;
@@ -21,7 +20,6 @@
   let displayRoutes = true;
   let displayBuildings = true;
   let data;
-  let currentZoom: LatLngExpression;
   let selectedIndex: number;
   let filters = [];
 
@@ -233,5 +231,68 @@
           : (selectedIndex = row.id)}
       selectedRow={selectedIndex}
     />
-  {/if}  
+  {/if}
+  <div>
+    <h1 class="flex pb-0 pt-2 text-2xl border-t">Stops</h1>
+    <p class="text-start m0">
+      <em>Top 40 stops by number of seniors served, by amenity</em>
+    </p>
+    {#if mapData}
+      <PlotWrapper
+        options={{
+          width: 900,
+          marginLeft: 300,
+          inset: 2,
+          fx: {
+            domain: [
+              "Shelter With Bench Underneath",
+              "Shelter Without Bench",
+              "Bench only",
+              "None",
+            ],
+          },
+          marks: [
+            Plot.frame(),
+            Plot.barX(mapData, {
+              x: (d) => d.properties["Age 65+ Total"],
+              y: (d) => d.properties["stop_name"],
+              fx: (d) => d.properties.amenity || "None",
+
+              channels: {
+                NORC: (d) => d.properties.Address,
+                "Num. Seniors": (d) => d.properties["Age 65+ Total"],
+              },
+              tip: {
+                format: {
+                  y: false,
+                  fx: false,
+                  x: false,
+                },
+              },
+              stroke: "white",
+              fill: (d) => d.properties.amenity || "None",
+              sort: {
+                y: "x",
+                reverse: true,
+                limit: 40,
+              },
+            }),
+          ],
+          color: {
+            range: d3.schemeBlues[9].slice(3, 7),
+            reverse: true,
+            domain: [
+              "Shelter With Bench Underneath",
+              "Shelter Without Bench",
+              "Bench only",
+              "None",
+            ]
+          },
+          style: {
+            width: "90%",
+          },
+        }}
+      />
+    {/if}
+  </div>
 </div>
