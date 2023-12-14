@@ -10,7 +10,7 @@ packages with `yarn` and run `yarn dev` (or `npm install` and `npm run dev`).
 To deploy the project, run `yarn build` (or `npm run build`).
 
 ## TTC Stop Amenities
-TTC stop amenities, ie benches and shelters, were taken from 3 sources. In all cases, this data was joined with TTC stop data using the TTC stop_code.
+TTC stop amenities, ie benches and shelters, were taken from 3 sources. In all cases, this data was joined with [TTC stop data](https://open.toronto.ca/dataset/ttc-routes-and-schedules/) using the TTC stop_code.
 - [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_bench=True for that stop
 - [Street Furniture - Transit Shelter - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-transit-shelter/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_shelter=True for that stop
 - A City data set obtained by OpenLab specifically highlighting shelters with benches. This data was joined using "TTC Stop ID." Link here if we can. If a stop was found in this dataset, we marked has_shelter_with_bench=True for that stop
