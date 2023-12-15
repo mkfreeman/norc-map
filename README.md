@@ -11,7 +11,7 @@ To deploy the project, run `yarn build` (or `npm run build`).
 
 ## TTC Stop Amenities
 TTC stop amenities, ie benches and shelters, were taken from 3 sources. In all cases, this data was joined with [TTC stop data](https://open.toronto.ca/dataset/ttc-routes-and-schedules/) using the TTC stop_code.
-- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_bench=True for that stop
+- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was first erroneously joined using SITEID column, but it turns out there appears to be no association between street furniture bench data and TTC stops. So, more work will be done with this. 
 - [Street Furniture - Transit Shelter - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-transit-shelter/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_shelter=True for that stop
 - A City data set obtained by OpenLab specifically highlighting shelters with benches. This data was joined using "TTC Stop ID." Link here if we can. If a stop was found in this dataset, we marked has_shelter_with_bench=True for that stop
 
@@ -19,7 +19,7 @@ Unforunately, there are a number of issues with this data. As noted on the Open 
 
 Furthermore, these data sets are inconsistent. Consider the definitions above and see this information:
 
-![image](https://github.com/mkfreeman/norc-map/assets/110122/157fb011-1067-4462-ab26-59776354da2a)
+<img width="250" alt="image" src="https://github.com/mkfreeman/norc-map/assets/110122/f3360d3f-37b2-49c4-bd60-f289067b41f6">
 
 It does not make sense, for example, that has_shelter_with_bench is true for 48 TTC stops where those same stops are marked has_shelter=false based on the other dataset. 
 
@@ -31,7 +31,7 @@ Amenity = "Shelter with Bench Underneath" if has_shelter_with_bench = true
 
 Amenity = "Shelter without bench" if has_shelter_with_bench = false AND has_shelter = true
 
-Amenity = "Bench only" if has_bench = true but the other two are false
+Benches alone (not shelters) are still a work in progress.
 
 This is not perfect, but it conservatively reflects what we can reliably say given the data, without analyzing every single stop on Google StreetView or in person. 
 
