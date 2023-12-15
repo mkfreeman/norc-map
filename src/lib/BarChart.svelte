@@ -10,7 +10,7 @@
   export let height = 60;
   export let title = "";
   export let selected = "";
-  const getY = (d) => (d.properties && d.properties[y]) || "None";
+  const getY = (d) => (d && d[y]) || "None";
 </script>
 
 <PlotWrapper

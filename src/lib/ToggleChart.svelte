@@ -20,23 +20,23 @@
       },
       marks: [
         Plot.barX(
-          data.features,
+          data,
           Plot.groupY(
             {
               x: "count",
-              ariaLabel: (v) => v[0].properties[prop],
+              ariaLabel: (v) => v[0][prop],
               stroke: (v) =>
-                `${v[0].properties[prop]}` === selected ? "black" : "none",
+                `${v[0][prop]}` === selected ? "black" : "none",
               fillOpacity: (v) =>
                 !selected
                   ? 0.8
-                  : `${v[0].properties[prop]}` === selected
+                  : `${v[0][prop]}` === selected
                     ? 1
                     : 0.5,
             },
             {
               y: (d) => 1,
-              fill: (d) => `${d.properties[prop]}`,
+              fill: (d) => `${d[prop]}`,
             }
           )
         ),
@@ -48,21 +48,21 @@
           dy: -10,
         }),
         Plot.textX(
-          data.features,
+          data,
           Plot.stackX(
             Plot.groupZ(
               {
                 x: "count",
-                text: (v) => v[0].properties[prop],
+                text: (v) => v[0][prop],
                 id: (v) => v[0].id,
                 ariaLabel: (v) => v[0],
               },
               {
-                z: (d) => d.properties[prop],
+                z: (d) => d[prop],
                 inset: 0.5,
                 textAnchor: "middle",
-                id: (d) => d.properties[prop],
-                ariaLabel: (d) => d.properties[prop],
+                id: (d) => d[prop],
+                ariaLabel: (d) => d[prop],
               }
             )
           )

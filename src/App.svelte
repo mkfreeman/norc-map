@@ -38,8 +38,7 @@
   ];
 
   onMount(async () => {
-    data = await fetch("./norcs_with_closest_stops_merged_new.geojson").then(
-      (res) => res.json()
+    data = await d3.csv("https://docs.google.com/spreadsheets/d/1NbU26zUWP9rhzm2W5weNxPFgq-yLUGxmDKtGoKA29i4/gviz/tq?tqx=out:csv&sheet=NORC", d3.autoType).then(
     );
   });
   // Map element visibility
@@ -59,13 +58,13 @@
   }
 
   // Data filters
-  $: mapData = data?.features.filter((d) => {
+  $: mapData = data?.filter((d) => {
     return filters.every((f) => {
       return typeof f.value === "string"
-        ? `${d.properties[f.prop]}` == (f.value === "None" ? "null" : f.value)
+        ? `${d[f.prop]}` == (f.value === "None" ? "null" : f.value)
         : Array.isArray(f.value)
-          ? d.properties[f.prop] >= f.value[0] &&
-            d.properties[f.prop] <= f.value[1]
+          ? d[f.prop] >= f.value[0] &&
+            d[f.prop] <= f.value[1]
           : false;
     });
   });
@@ -73,8 +72,8 @@
   // Click functionality for zooming the map
   $: view = selectedIndex
     ? [
-        mapData[selectedIndex + 1].properties.latitude, // TODO: 0 index the id
-        mapData[selectedIndex + 1].properties.longitude,
+        mapData[selectedIndex + 1].latitude, // TODO: 0 index the id
+        mapData[selectedIndex + 1].longitude,
       ]
     : initialView;
   $: zoom = selectedIndex ? 14 : 11;
@@ -93,19 +92,19 @@
   function getPopupContent(building) {
     return `
       <em>Building: </em><a target="_blank" href="${getStreetViewUrl(
-        building.properties.latitude,
-        building.properties.longitude
-      )}">${building.properties.Address}</a><br/>
+        building.latitude,
+        building.longitude
+      )}">${building.Address}</a><br/>
       <em>Pct. Seniors: </em>${d3.format(".1%")(
-        building.properties["% of Seniors"]
+        building["% of Seniors"]
       )}<br/>
 <em>Stop</em>: <a target="_blank" href="${getStreetViewUrl(
-      building.properties.stop_lat,
-      building.properties.stop_lon
-    )}">${building.properties.stop_name}</a><br/>
-      <em>Distance</em>: ${building.properties.distance}m<br/>
-      <em>Amenity</em>: ${building.properties.amenity || "None"}<br/>
-      <em>Source</em>: ${building.properties.source}
+      building.stop_lat,
+      building.stop_lon
+    )}">${building.stop_name}</a><br/>
+      <em>Distance</em>: ${building.distance}m<br/>
+      <em>Amenity</em>: ${building.amenity || "None"}<br/>
+      <em>Source</em>: ${building.source}
     `;
   }
 </script>
@@ -128,7 +127,7 @@
             : toggleFilter("wheelchair_boarding", event.target.ariaLabel)}
       />
       <BarChart
-        data={data.features}
+        data={data}
         y={"amenity"}
         marginLeft={200}
         width={300}
@@ -142,7 +141,7 @@
     <div class="flex flex-wrap mt-3">
       {#each histogramOptions as option}
         <Histogram
-          data={data.features.map((d) => d.properties[option.prop])}
+          data={data.map((d) => d[option.prop])}
           label={`${option.label} →`}
           onUpdate={(range) => toggleFilter(option.prop, range)}
           tickFormat={option.tickFormat}
@@ -174,12 +173,12 @@
     <div class="w-[calc(100%-80px)] h-[calc(50vh)]">
       <Leaflet {view} {zoom}>
         {#if mapData}
-          {#each mapData as building, index (building.properties.id)}
+          {#each mapData as building, index (building.id)}
             {#if displayBuildings}
               <Marker
                 latLng={[
-                  +building.properties.latitude,
-                  +building.properties.longitude,
+                  +building.latitude,
+                  +building.longitude,
                 ]}
                 radius={4}
                 fillColor="black"
@@ -192,8 +191,8 @@
             {#if displayStations}
               <Marker
                 latLng={[
-                  +building.properties.stop_lat,
-                  +building.properties.stop_lon,
+                  +building.stop_lat,
+                  +building.stop_lon,
                 ]}
                 radius={4}
                 fillColor="red"
@@ -202,9 +201,9 @@
               </Marker>
             {/if}
             {#if displayRoutes}
-              {#if building.geometry}
+              {#if building.geom}
                 <PolyLine
-                  latLngs={building.geometry.coordinates.map((d) => [
+                  latLngs={JSON.parse(building.geom).coordinates.map((d) => [
                     +d[1],
                     +d[0],
                   ])}
@@ -221,10 +220,10 @@
   {#if mapData}
     <Table
       items={mapData.map((d) => ({
-        ...d.properties,
-        "% of Seniors": d3.format(".1%")(d.properties["% of Seniors"]),
+        ...d,
+        "% of Seniors": d3.format(".1%")(d["% of Seniors"]),
       }))}
-      sortBy="Distance"
+      sortBy="distance"
       rowClick={(row) =>
         selectedIndex === row.id
           ? (selectedIndex = null)
@@ -254,13 +253,13 @@
           marks: [
             Plot.frame(),
             Plot.barX(mapData, {
-              x: (d) => d.properties["Age 65+ Total"],
-              y: (d) => d.properties["stop_name"],
-              fx: (d) => d.properties.amenity || "None",
+              x: (d) => d["Age 65+ Total"],
+              y: (d) => d["stop_name"],
+              fx: (d) => d.amenity || "None",
 
               channels: {
-                NORC: (d) => d.properties.Address,
-                "Num. Seniors": (d) => d.properties["Age 65+ Total"],
+                NORC: (d) => d.Address,
+                "Num. Seniors": (d) => d["Age 65+ Total"],
               },
               tip: {
                 format: {
@@ -270,7 +269,7 @@
                 },
               },
               stroke: "white",
-              fill: (d) => d.properties.amenity || "None",
+              fill: (d) => d.amenity || "None",
               sort: {
                 y: "x",
                 reverse: true,

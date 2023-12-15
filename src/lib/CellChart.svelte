@@ -14,8 +14,8 @@
         Plot.group(
           { fill: "count", text: "count" },
           {
-            x: (d) => d.properties[x],
-            y: (d) => d.properties[y],
+            x: (d) => d[x],
+            y: (d) => d[y],
             tip: true,
           }
         )
@@ -25,8 +25,8 @@
         Plot.group(
           { text: "count" },
           {
-            x: (d) => d.properties[x],
-            y: (d) => d.properties[y],
+            x: (d) => d[x],
+            y: (d) => d[y],
             fill: "white",
             stroke: "black",
           }
