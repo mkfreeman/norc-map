@@ -2,7 +2,7 @@ import json
 import argparse
 
 # List of properties to keep
-properties_to_keep = ['id',"Address", "stop_name", "distance", "Age 65+ Total", "All_Persons", "% of Seniors", "wheelchair_boarding", "latitude", "longitude", "stop_lat", "stop_lon", "amenity", "source"]
+properties_to_keep = ['id',"Address", "stop_code", "has_shelter", "has_shelter_with_bench", "bench_count", "stop_name", "distance", "Age 65+ Total", "All_Persons", "% of Seniors", "wheelchair_boarding", "latitude", "longitude", "stop_lat", "stop_lon", "amenity", "source"]
 
 # This function will keep only the properties listed above, and
 # it also does the correction to the stop amenities and wheelchair properties
@@ -19,15 +19,16 @@ def process_geojson(input_file):
         has_shelter_with_bench = feature['properties']["has_shelter_with_bench"]
         has_shelter = feature['properties']["has_shelter"]
         has_bench = feature['properties']["has_bench"]
-        amenity = None
+        amenity = []
         if has_shelter_with_bench:
-            amenity = "Shelter With Bench Underneath"
+            amenity = ["Shelter With Bench Underneath"]
         elif has_shelter:
-            amenity = "Shelter Without Bench"
-        elif has_bench:
-            amenity = "Bench only"
+            amenity = ["Shelter Without Bench"]
 
-        feature["properties"]["amenity"] = amenity
+        if feature["properties"]["bench_count"] > 0:
+            amenity.append("Bench nearby")
+
+        feature["properties"]["amenity"] = ",".join(amenity)
         
         # cleanup wheelchair to have words
         if feature["properties"]["wheelchair_boarding"] == 1:
