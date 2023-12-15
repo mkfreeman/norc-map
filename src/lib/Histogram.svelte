@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import {
     scaleLinear,
@@ -11,10 +11,13 @@
     format
   } from "d3";
 
+  interface tf {
+    (n: number): string;
+  }
   export let data = Array.from({ length: 100 }, (_, i) => i);
   export let width = 200;
   export let height = 75;
-  export let tickFormat = format(".2s")
+  export let tickFormat:tf = format(".2s")
   export let onUpdate = null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;

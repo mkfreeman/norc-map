@@ -14,16 +14,64 @@
   import * as Plot from "@observablehq/plot";
   import BarChart from "./lib/BarChart.svelte";
 
+  interface dataObj {
+    properties: {
+      id: number;
+      wheelchair_boarding: "Some" | "None";
+      Address: string;
+      "Age 65+ Total": number;
+      "% of Seniors": number;
+      amenity: string;
+      source: string;
+      stop_name: string;
+      stop_lat: number;
+      stop_lon: number;
+      distance: number;
+      latitude: number;
+      longitude: number;
+    };
+    geometry: {
+      coordinates: number[][];
+    };
+  }
+  interface dataJson {
+    features: dataObj[];
+    type: "FeatureCollection";
+    crs: {
+      type: "name";
+      properties: {
+        name: string;
+      };
+    };
+  }
+  type filterProp =
+    | "wheelchair_boarding"
+    | "amenity"
+    | "distance"
+    | "Age 65+ Total"
+    | "% of Seniors";
+  interface filterObj {
+    prop: filterProp;
+    value: string | number[];
+  }
+
+  interface histogramOption {
+    prop: "distance" | "Age 65+ Total" | "% of Seniors" | "% of Seniors";
+    label: string;
+    tickFormat: (n: number) => string;
+  }
+
   let initialView: LatLngExpression = [43.70107, -79.397015];
+  let view: LatLngExpression;
   let zoom: number = 11;
   let displayStations = true;
   let displayRoutes = true;
   let displayBuildings = true;
-  let data;
+  let data: dataJson;
   let selectedIndex: number;
-  let filters = [];
+  let filters: filterObj[] = [];
 
-  const histogramOptions = [
+  const histogramOptions: histogramOption[] = [
     { prop: "distance", label: "Distance", tickFormat: d3.format(".2s") },
     {
       prop: "Age 65+ Total",
@@ -53,18 +101,18 @@
   }
 
   // url generation based on this answer: https://stackoverflow.com/questions/387942/google-street-view-url
-  function getStreetViewUrl(lat, lng) {
+  function getStreetViewUrl(lat: number, lng: number) {
     return `http://maps.google.com/maps?q=&layer=c&cbll=${lat},${lng}&cbp=11,0,0,0,0`;
   }
 
   // Data filters
-  $: mapData = data?.filter((d) => {
-    return filters.every((f) => {
+  $: mapData = data?.filter((d : dataObj) => {
+    return filters.every((f : filterObj) => {
       return typeof f.value === "string"
         ? `${d[f.prop]}` == (f.value === "None" ? "null" : f.value)
         : Array.isArray(f.value)
-          ? d[f.prop] >= f.value[0] &&
-            d[f.prop] <= f.value[1]
+          ? +d[f.prop] >= f.value[0] &&
+            +d[f.prop] <= f.value[1]
           : false;
     });
   });
@@ -78,18 +126,18 @@
     : initialView;
   $: zoom = selectedIndex ? 14 : 11;
 
-  function toggleFilter(prop, value) {
+  function toggleFilter(prop: filterProp, value: string | number[]) {
     if (
       filters.find(
         (f) => f.prop === prop && (f.value === value || value === null)
       )
     ) {
-      $: filters = filters.filter((f) => f.prop !== prop);
+      filters = filters.filter((f) => f.prop !== prop);
     } else {
-      $: filters = [...filters.filter((f) => f.prop !== prop), { prop, value }];
+      filters = [...filters.filter((f) => f.prop !== prop), { prop, value }];
     }
   }
-  function getPopupContent(building) {
+  function getPopupContent(building: dataObj) {
     return `
       <em>Building: </em><a target="_blank" href="${getStreetViewUrl(
         building.latitude,
@@ -131,7 +179,7 @@
         y={"amenity"}
         marginLeft={200}
         width={300}
-        selected={filters.find((d) => d.prop === "amenity")?.value}
+        selected={filters.find((d) => d.prop === "amenity")?.value.toString()}
         handleClick={(event) =>
           !event.target.ariaLabel
             ? null
@@ -266,6 +314,7 @@
                   y: false,
                   fx: false,
                   x: false,
+                  fill: false
                 },
               },
               stroke: "white",
@@ -285,7 +334,7 @@
               "Shelter Without Bench",
               "Bench only",
               "None",
-            ]
+            ],
           },
           style: {
             width: "90%",

@@ -9,6 +9,33 @@ packages with `yarn` and run `yarn dev` (or `npm install` and `npm run dev`).
 
 To deploy the project, run `yarn build` (or `npm run build`).
 
+## TTC Stop Amenities
+TTC stop amenities, ie benches and shelters, were taken from 3 sources. In all cases, this data was joined with [TTC stop data](https://open.toronto.ca/dataset/ttc-routes-and-schedules/) using the TTC stop_code.
+- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_bench=True for that stop
+- [Street Furniture - Transit Shelter - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-transit-shelter/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_shelter=True for that stop
+- A City data set obtained by OpenLab specifically highlighting shelters with benches. This data was joined using "TTC Stop ID." Link here if we can. If a stop was found in this dataset, we marked has_shelter_with_bench=True for that stop
+
+Unforunately, there are a number of issues with this data. As noted on the Open Data Portal, the first two data sets have no description of their columns, and so it is difficult to understand what kind of shelter or bench is present. We made minimal assumptions and hence made the decision noted with each data set above. 
+
+Furthermore, these data sets are inconsistent. Consider the definitions above and see this information:
+
+![image](https://github.com/mkfreeman/norc-map/assets/110122/157fb011-1067-4462-ab26-59776354da2a)
+
+It does not make sense, for example, that has_shelter_with_bench is true for 48 TTC stops where those same stops are marked has_shelter=false based on the other dataset. 
+
+This is noted in more detail here: https://github.com/mkfreeman/norc-map/issues/28#issuecomment-1850468479. Furthermore, at times the datasets do not actually reflect what is shown on Google Streetview (which, we acknowledge, may be out of date, or the dataset could be out of date). 
+
+Based on examination of the data we had, we made a simple rule noted in the issue above which is visible in our interface:
+
+Amenity = "Shelter with Bench Underneath" if has_shelter_with_bench = true
+
+Amenity = "Shelter without bench" if has_shelter_with_bench = false AND has_shelter = true
+
+Amenity = "Bench only" if has_bench = true but the other two are false
+
+This is not perfect, but it conservatively reflects what we can reliably say given the data, without analyzing every single stop on Google StreetView or in person. 
+
+
 ## References / notes
 - Leaflet implementation based on [this
   repo](https://github.com/ShipBit/sveltekit-leaflet/), referenced in this
