@@ -11,7 +11,7 @@ To deploy the project, run `yarn build` (or `npm run build`).
 
 ## TTC Stop Amenities
 TTC stop amenities, ie benches and shelters, were taken from 3 sources. In all cases, this data was joined with [TTC stop data](https://open.toronto.ca/dataset/ttc-routes-and-schedules/) using the TTC stop_code.
-- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was first erroneously joined using SITEID column, but it turns out there appears to be no association between street furniture bench data and TTC stops. So, more work will be done with this. 
+- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was first erroneously joined using SITEID column, but it turns out there appears to be no association between street furniture bench data and TTC stops. So, any stop that has a bench within 10 meters of it is considered to have a bench nearby.
 - [Street Furniture - Transit Shelter - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-transit-shelter/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_shelter=True for that stop
 - A City data set obtained by OpenLab specifically highlighting shelters with benches. This data was joined using "TTC Stop ID." Link here if we can. If a stop was found in this dataset, we marked has_shelter_with_bench=True for that stop
 
@@ -31,7 +31,7 @@ Amenity = "Shelter with Bench Underneath" if has_shelter_with_bench = true
 
 Amenity = "Shelter without bench" if has_shelter_with_bench = false AND has_shelter = true
 
-Benches alone (not shelters) are still a work in progress.
+If a bench is within 10 meters, then the amenity property also includes "Bench nearby."
 
 This is not perfect, but it conservatively reflects what we can reliably say given the data, without analyzing every single stop on Google StreetView or in person. 
 
