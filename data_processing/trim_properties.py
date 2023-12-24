@@ -25,7 +25,7 @@ def process_geojson(input_file):
         elif has_shelter:
             amenity = ["Shelter Without Bench"]
 
-        if feature["properties"]["bench_count"] > 0:
+        if feature["properties"]["bench_count"] > 0 and (len(amenity)==0 or "Without" in amenity[0]):
             amenity.append("Bench nearby")
 
         feature["properties"]["amenity"] = ",".join(amenity)
