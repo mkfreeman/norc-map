@@ -8,7 +8,7 @@
     bin,
     brushX,
     extent,
-    format
+    format,
   } from "d3";
 
   interface tf {
@@ -17,8 +17,8 @@
   export let data = Array.from({ length: 100 }, (_, i) => i);
   export let width = 200;
   export let height = 75;
-  export let tickFormat:tf = format(".2s")
-  export let onUpdate = null;
+  export let tickFormat: tf = format(".2s");
+  export let onUpdate: (e: any) => void = (e) => null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
   let el;
   onMount(() => {

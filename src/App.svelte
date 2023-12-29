@@ -15,24 +15,20 @@
   import BarChart from "./lib/BarChart.svelte";
 
   interface dataObj {
-    properties: {
-      id: number;
-      wheelchair_boarding: "Some" | "None";
-      Address: string;
-      "Age 65+ Total": number;
-      "% of Seniors": number;
-      amenity: string;
-      source: string;
-      stop_name: string;
-      stop_lat: number;
-      stop_lon: number;
-      distance: number;
-      latitude: number;
-      longitude: number;
-    };
-    geometry: {
-      coordinates: number[][];
-    };
+    id: number;
+    wheelchair_boarding: "Some" | "None";
+    Address: string;
+    "Age 65+ Total": number;
+    "% of Seniors": number;
+    amenity: string;
+    source: string;
+    stop_name: string;
+    stop_lat: number;
+    stop_lon: number;
+    distance: number;
+    latitude: number;
+    longitude: number;
+    geom: string;
   }
   interface dataJson {
     features: dataObj[];
@@ -67,8 +63,8 @@
   let displayStations = true;
   let displayRoutes = true;
   let displayBuildings = true;
-  let data: dataJson;
-  let selectedIndex: number;
+  let data: dataObj[];
+  let selectedIndex: number | null;
   let filters: filterObj[] = [];
 
   const histogramOptions: histogramOption[] = [
@@ -86,12 +82,13 @@
   ];
 
   onMount(async () => {
-    data = await d3.csv(
+    const loaded = await d3.csv<dataObj>(
       "https://docs.google.com/spreadsheets/d/1NbU26zUWP9rhzm2W5weNxPFgq-yLUGxmDKtGoKA29i4/gviz/tq?tqx=out:csv&sheet=NORC",
       d3.autoType
     );
+    data = loaded.map((d) => ({ ...d, amenity: d.amenity || "None" }));
   });
-  $: options = [...new Set(data?.map((d) => d.amenity || "None"))];
+  $: options = [...new Set(data?.map((d) => d.amenity))];
 
   // Map element visibility
   function toggleStations() {
@@ -113,7 +110,7 @@
   $: mapData = data?.filter((d: dataObj) => {
     return filters.every((f: filterObj) => {
       return typeof f.value === "string"
-        ? `${d[f.prop]}` == (f.value === "None" ? "null" : f.value)
+        ? `${d[f.prop]}` === f.value
         : Array.isArray(f.value)
           ? +d[f.prop] >= f.value[0] && +d[f.prop] <= f.value[1]
           : false;
@@ -128,7 +125,7 @@
       ]
     : initialView;
   $: zoom = selectedIndex ? 14 : 11;
-
+  $: console.log({ filters });
   function toggleFilter(prop: filterProp, value: string | number[]) {
     if (
       filters.find(
@@ -152,10 +149,26 @@
       building.stop_lon
     )}">${building.stop_name}</a><br/>
       <em>Distance</em>: ${building.distance}m<br/>
-      <em>Amenity</em>: ${building.amenity || "None"}<br/>
+      <em>Amenity</em>: ${building.amenity}<br/>
       <em>Source</em>: ${building.source}
     `;
   }
+  function rowClick(row: dataObj) {
+    selectedIndex === row.id
+      ? (selectedIndex = null)
+      : (selectedIndex = row.id);
+  }
+
+  const handleToggleClick = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    !target.ariaLabel
+      ? null
+      : toggleFilter("wheelchair_boarding", target.ariaLabel);
+  };
+  const invertCoords = (d: number[]) => [+d[1], +d[0]];
+  // This is a bit tricky - a function that returns the desired update function
+  // Done because typescript doesn't allow the type to be defined inline
+  const getOnUpdate = (prop:filterProp) => (range:number[]) => toggleFilter(prop, range)
 </script>
 
 <div class="w-full">
@@ -168,20 +181,18 @@
       <ToggleChart
         prop={"wheelchair_boarding"}
         label={"Wheelchair boarding"}
-        selected={filters.find((d) => d.prop === "wheelchair_boarding")?.value}
+        selected={filters
+          .find((d) => d.prop === "wheelchair_boarding")
+          ?.value.toString()}
         {data}
-        handleClick={(event) =>
-          !event.target.ariaLabel
-            ? null
-            : toggleFilter("wheelchair_boarding", event.target.ariaLabel)}
+        handleClick={handleToggleClick}
       />
       <BarChart
-        data={data?.map((d) => ({ y: d.amenity || "None" }))}
+        data={data?.map((d) => ({ y: d.amenity }))}
         fill="rgb(104,175,252)"
         marginLeft={200}
         width={300}
         selected={filters.find((d) => d.prop === "amenity")?.value.toString()}
-        domain={options}
         handleClick={(event) => {
           console.log(event.target.ariaLabel);
           !event.target.ariaLabel
@@ -195,7 +206,7 @@
         <Histogram
           data={data.map((d) => d[option.prop])}
           label={`${option.label} →`}
-          onUpdate={(range) => toggleFilter(option.prop, range)}
+          onUpdate={getOnUpdate(option.prop)}
           tickFormat={option.tickFormat}
         />
       {/each}
@@ -249,10 +260,9 @@
             {#if displayRoutes}
               {#if building.geom}
                 <PolyLine
-                  latLngs={JSON.parse(building.geom).coordinates.map((d) => [
-                    +d[1],
-                    +d[0],
-                  ])}
+                  latLngs={JSON.parse(building.geom).coordinates.map(
+                    invertCoords
+                  )}
                 >
                   <Popup>{@html getPopupContent(building)}</Popup>
                 </PolyLine>
@@ -273,10 +283,7 @@
         };
       })}
       sortBy="distance"
-      rowClick={(row) =>
-        selectedIndex === row.id
-          ? (selectedIndex = null)
-          : (selectedIndex = row.id)}
+      {rowClick}
       selectedRow={selectedIndex}
     />
   {/if}
@@ -303,7 +310,7 @@
             Plot.barX(mapData, {
               x: (d) => d["Age 65+ Total"],
               y: (d) => d["stop_name"],
-              fx: (d) => d.amenity || "None",
+              fx: (d) => d.amenity,
 
               channels: {
                 NORC: (d) => d.Address,
@@ -318,7 +325,7 @@
                 },
               },
               stroke: "white",
-              fill: (d) => d.amenity || "None",
+              fill: (d) => d.amenity,
               sort: {
                 y: "x",
                 reverse: true,

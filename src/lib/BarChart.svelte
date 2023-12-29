@@ -1,7 +1,11 @@
 <script lang="ts">
+  interface dataElement {
+    y: string;
+  }
+
   import PlotWrapper from "./PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
-  export let data: [] = [];
+  export let data: dataElement[];
   export let handleClick: (e: any) => void = (e) => null;
   export let marginLeft = 300;
   export let width = 330;

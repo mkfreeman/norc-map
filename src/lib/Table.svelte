@@ -1,17 +1,19 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher, onDestroy } from "svelte";
-
   $: sortOrder = -1;
   let maxHeight = "400px";
 
-  export let items = [];
+  interface item {
+    id: number;
+    [key: string]: any;
+  }
+  export let items: item[] = [];
   export let sortBy = "";
-  export let selectedRow;
+  export let selectedRow: number | null;
   export let searchTerm = "";
-  export let rowClick = () => {};
+  export let rowClick: (e: any) => void = (e) => null;
   const handleClick = (key: string) => {
     if (sortBy === key) sortOrder *= -1;
-    else $: sortBy = key;
+    else sortBy = key;
   };
 
   $: tableData = [...items]
@@ -46,6 +48,11 @@
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   }
+
+  let inputEvent = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    searchTerm = target.value;
+  };
 </script>
 
 <div class="mb-10">
@@ -96,7 +103,7 @@
         </svg>
       </div>
       <input
-        on:input={(event) => (searchTerm = event.target.value)}
+        on:input={inputEvent}
         type="search"
         id="default-search"
         class="block w-full p-2 ps-10

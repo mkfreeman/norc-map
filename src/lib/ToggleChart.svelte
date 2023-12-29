@@ -3,9 +3,9 @@
   import * as Plot from "@observablehq/plot";
   export let data;
   export let handleClick;
-  export let selected;
-  export let label;
-  export let prop;
+  export let selected:string | undefined;
+  export let label:string;
+  export let prop:string;
 </script>
 
 <div class="mx-1">

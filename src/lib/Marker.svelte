@@ -1,16 +1,9 @@
 <script lang="ts">
-  import {
-    onMount,
-    onDestroy,
-    getContext,
-    setContext,
-    beforeUpdate,
-    afterUpdate,
-  } from "svelte";
+  import { onMount, onDestroy, getContext, setContext } from "svelte";
   import L, { type PointExpression } from "leaflet";
 
   export let latLng: L.LatLngExpression;
-  export let iconUrl: string;
+  export let iconUrl: string = "";
   export let iconSize: PointExpression = [50, 50];
   export let radius = 4;
   export let fillColor = "blue";
@@ -29,18 +22,18 @@
     marker = !map
       ? undefined
       : iconUrl
-      ? L.marker(latLng, {
-          icon: L.icon({
-            iconUrl,
-            iconSize,
-          }),
-        }).addTo(map)
-      : L.circleMarker(latLng, {
-          radius,
-          fillColor,
-          stroke: false,
-          fillOpacity: .6,
-        }).addTo(map);
+        ? L.marker(latLng, {
+            icon: L.icon({
+              iconUrl,
+              iconSize,
+            }),
+          }).addTo(map)
+        : L.circleMarker(latLng, {
+            radius,
+            fillColor,
+            stroke: false,
+            fillOpacity: 0.6,
+          }).addTo(map);
   }
 
   onMount(() => {
