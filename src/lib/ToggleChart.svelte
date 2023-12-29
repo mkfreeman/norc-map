@@ -1,11 +1,17 @@
 <script lang="ts">
   import PlotWrapper from "./PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
-  export let data;
-  export let handleClick;
-  export let selected:string | undefined;
-  export let label:string;
-  export let prop:string;
+  type dataObj = { category: string };
+  export let data: dataObj[];
+  export let handleClick: (e: any) => void = (e) => null;
+  export let selected: string | undefined;
+  export let label: string;
+  const ariaLabel = (v: dataObj[]) => v[0].category;
+  const text = (v: string[]) => v[0];
+  $: stroke = (v: dataObj[]) =>
+    `${v[0].category}` === selected ? "black" : "none";
+  const fillOpacity = (v: dataObj[]) =>
+    !selected ? 0.8 : `${v[0].category}` === selected ? 1 : 0.5;
 </script>
 
 <div class="mx-1">
@@ -16,7 +22,7 @@
       marginTop: 10,
       color: {
         range: ["rgb(104,175,252)", "rgb(164 114 244)"],
-        domain: prop === "wheelchair_boarding" ? ["Some", "None"]: ["true", "false"],
+        domain: ["Some", "None"],
       },
       marks: [
         Plot.barX(
@@ -24,19 +30,13 @@
           Plot.groupY(
             {
               x: "count",
-              ariaLabel: (v) => v[0][prop],
-              stroke: (v) =>
-                `${v[0][prop]}` === selected ? "black" : "none",
-              fillOpacity: (v) =>
-                !selected
-                  ? 0.8
-                  : `${v[0][prop]}` === selected
-                    ? 1
-                    : 0.5,
+              ariaLabel,
+              stroke,
+              fillOpacity,
             },
             {
               y: (d) => 1,
-              fill: (d) => `${d[prop]}`,
+              fill: "category",
             }
           )
         ),
@@ -53,16 +53,14 @@
             Plot.groupZ(
               {
                 x: "count",
-                text: (v) => v[0][prop],
-                id: (v) => v[0].id,
-                ariaLabel: (v) => v[0],
+                text,
+                ariaLabel,
               },
               {
-                z: (d) => d[prop],
+                text: "category",
+                z: "category",
                 inset: 0.5,
                 textAnchor: "middle",
-                id: (d) => d[prop],
-                ariaLabel: (d) => d[prop],
               }
             )
           )

@@ -179,12 +179,11 @@
   {#if data}
     <div class="flex flex-wrap mt-3">
       <ToggleChart
-        prop={"wheelchair_boarding"}
         label={"Wheelchair boarding"}
         selected={filters
           .find((d) => d.prop === "wheelchair_boarding")
           ?.value.toString()}
-        {data}
+        data={data.map(d => ({category: d.wheelchair_boarding}))}
         handleClick={handleToggleClick}
       />
       <BarChart
