@@ -54,7 +54,7 @@
   interface histogramOption {
     prop: "distance" | "Age 65+ Total" | "% of Seniors" | "% of Seniors";
     label: string;
-    tickFormat: (n: number) => string;
+    tickFormat: (n: number | { valueOf(): number }) => string;
   }
 
   let initialView: LatLngExpression = [43.70107, -79.397015];
@@ -168,7 +168,8 @@
   const invertCoords = (d: number[]) => [+d[1], +d[0]];
   // This is a bit tricky - a function that returns the desired update function
   // Done because typescript doesn't allow the type to be defined inline
-  const getOnUpdate = (prop:filterProp) => (range:number[]) => toggleFilter(prop, range)
+  const getOnUpdate = (prop: filterProp) => (range: number[]) =>
+    toggleFilter(prop, range);
 </script>
 
 <div class="w-full">
@@ -183,7 +184,7 @@
         selected={filters
           .find((d) => d.prop === "wheelchair_boarding")
           ?.value.toString()}
-        data={data.map(d => ({category: d.wheelchair_boarding}))}
+        data={data.map((d) => ({ category: d.wheelchair_boarding }))}
         handleClick={handleToggleClick}
       />
       <BarChart
@@ -310,7 +311,6 @@
               x: (d) => d["Age 65+ Total"],
               y: (d) => d["stop_name"],
               fx: (d) => d.amenity,
-
               channels: {
                 NORC: (d) => d.Address,
                 "Num. Seniors": (d) => d["Age 65+ Total"],
@@ -324,7 +324,7 @@
                 },
               },
               stroke: "white",
-              fill: (d) => d.amenity,
+              fill: "rgb(104,175,252)",
               sort: {
                 y: "x",
                 reverse: true,
@@ -332,16 +332,6 @@
               },
             }),
           ],
-          color: {
-            range: d3.schemeBlues[9].slice(3, 7),
-            reverse: true,
-            domain: [
-              "Shelter With Bench Underneath",
-              "Shelter Without Bench",
-              "Bench only",
-              "None",
-            ],
-          },
           style: {
             width: "90%",
           },

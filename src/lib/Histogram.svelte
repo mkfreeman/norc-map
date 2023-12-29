@@ -9,18 +9,19 @@
     brushX,
     extent,
     format,
+    type D3BrushEvent,
   } from "d3";
 
   interface tf {
     (n: number): string;
   }
-  export let data = Array.from({ length: 100 }, (_, i) => i);
+  export let data: number[] = Array.from({ length: 100 }, (_, i) => i);
   export let width = 200;
   export let height = 75;
-  export let tickFormat: tf = format(".2s");
+  export let tickFormat = format(".2s");
   export let onUpdate: (e: any) => void = (e) => null;
   export let label = "Value →"; // Default x-axis label with arrow pointing right
-  let el;
+  let el: HTMLDivElement;
   onMount(() => {
     const margin = { top: 15, right: 30, bottom: 30, left: 30 };
 
@@ -30,13 +31,13 @@
       .attr("height", height);
 
     const x = scaleLinear()
-      .domain(extent(data))
+      .domain(extent(data) as [number, number])
       .range([margin.left, width - margin.right])
       .nice();
 
-    const histogramData = bin().domain(x.domain()).thresholds(x.ticks(20))(
-      data
-    );
+    const histogramData = bin()
+      .domain(x.domain() as [number, number])
+      .thresholds(x.ticks(20))(data);
 
     const maxBinCount = Math.max(...histogramData.map((d) => d.length));
 
@@ -50,8 +51,8 @@
       .data(histogramData)
       .enter()
       .append("rect")
-      .attr("x", (d) => x(d.x0) + 1)
-      .attr("width", (d) => Math.max(0, x(d.x1) - x(d.x0) - 1))
+      .attr("x", (d) => x(d.x0 ? d.x0 : 0) + 1)
+      .attr("width", (d) => Math.max(0, x(d.x1!) - x(d.x0!) - 1))
       .attr("y", (d) => y(d.length))
       .attr("height", (d) => y(0) - y(d.length))
       .attr("fill", "rgb(104,175,252)")
@@ -86,11 +87,11 @@
       .attr("transform", `translate(${margin.left},0)`)
       .call(axisLeft(y).ticks(2));
 
-    function brushed(event) {
+    function brushed(event: D3BrushEvent<any>) {
       if (event.selection) {
-        const [x0, x1] = event.selection;
+        const [x0, x1] = event.selection as [number, number];
         bars.attr("fill-opacity", (d) => {
-          const barX = x(d.x0) + 1;
+          const barX = x(d.x0!) + 1;
           return barX >= x0 && barX <= x1 ? 1 : 0.3;
         });
         if (onUpdate) {
@@ -99,7 +100,7 @@
       }
     }
 
-    function brushEnded(event) {
+    function brushEnded(event: D3BrushEvent<any>) {
       if (!event.selection) {
         bars.attr("fill-opacity", 1); // Reset all bars to original opacity when brush is cleared
         if (onUpdate) {
