@@ -129,7 +129,7 @@
     : initialView;
   $: zoom = selectedIndex ? 14 : 11;
 
-  function toggleFilter(prop: filterProp, value: string | number[]) {    
+  function toggleFilter(prop: filterProp, value: string | number[]) {
     if (
       filters.find(
         (f) => f.prop === prop && (f.value === value || value === null)
@@ -265,10 +265,13 @@
   </div>
   {#if mapData}
     <Table
-      items={mapData.map((d) => ({
-        ...d,
-        "% of Seniors": d3.format(".1%")(d["% of Seniors"]),
-      }))}
+      items={mapData.map((d) => {
+        const { geom, ...rest } = d; // remove geom from table
+        return {
+          ...rest,
+          "% of Seniors": d3.format(".1%")(d["% of Seniors"]),
+        };
+      })}
       sortBy="distance"
       rowClick={(row) =>
         selectedIndex === row.id
