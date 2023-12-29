@@ -1,16 +1,16 @@
-<script>
+<script lang="ts">
   import PlotWrapper from "./PlotWrapper.svelte";
   import * as Plot from "@observablehq/plot";
-  import * as d3 from "d3";
-  export let data;
-  export let y = "amenity";
-  export let handleClick;
+  export let data: [] = [];
+  export let handleClick: (e: any) => void = (e) => null;
   export let marginLeft = 300;
   export let width = 330;
   export let height = 60;
   export let title = "";
+  export let fill = "black";
   export let selected = "";
-  const getY = (d) => (d && d[y]) || "None";
+  const ariaLabel = (v: any) => v[0];
+  $: opacity = (v: any) => (!selected ? 1 : v[0] === selected ? 1 : 0.2);
 </script>
 
 <PlotWrapper
@@ -29,18 +29,18 @@
         Plot.groupY(
           {
             x: "count",
-            ariaLabel: (v) => v[0],
-            opacity: (v) => (!selected ? 1 : v[0] === selected ? 1 : 0.2),
+            ariaLabel,
+            opacity,
           },
           {
-            y: getY,
-            fill: getY,
-            ariaLabel: getY,
+            y: "y",
+            fill,
+            ariaLabel: (d) => d.y,
+            opacity: (d) => d.y,
             sort: {
               y: "x",
               reverse: true,
             },
-            opacity: getY,
           }
         )
       ),
@@ -50,11 +50,11 @@
           {
             x: "count",
             text: "count",
-            ariaLabel: (v) => v[0],
+            ariaLabel,
           },
           {
-            y: getY,
-            ariaLabel: getY,
+            y: "y",
+            ariaLabel: "y",
             dx: 2,
             textAnchor: "start",
             sort: {
@@ -71,20 +71,13 @@
       label: null,
       axis: null,
     },
+    y: {
+      label: null,
+    },
     width,
     height,
     marginTop: 0,
     marginBottom: 0,
-    color: {
-      range: d3.schemeBlues[9].slice(3, 7),
-      reverse: true,
-      domain: [
-        "Shelter With Bench Underneath",
-        "None",
-        "Bench only",
-        "Shelter Without Bench",
-      ],
-    },
     style: {
       cursor: "pointer",
       userSelect: "none",

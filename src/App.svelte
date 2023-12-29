@@ -86,9 +86,13 @@
   ];
 
   onMount(async () => {
-    data = await d3.csv("https://docs.google.com/spreadsheets/d/1NbU26zUWP9rhzm2W5weNxPFgq-yLUGxmDKtGoKA29i4/gviz/tq?tqx=out:csv&sheet=NORC", d3.autoType).then(
+    data = await d3.csv(
+      "https://docs.google.com/spreadsheets/d/1NbU26zUWP9rhzm2W5weNxPFgq-yLUGxmDKtGoKA29i4/gviz/tq?tqx=out:csv&sheet=NORC",
+      d3.autoType
     );
   });
+  $: options = [...new Set(data?.map((d) => d.amenity || "None"))];
+
   // Map element visibility
   function toggleStations() {
     displayStations = !displayStations;
@@ -106,13 +110,12 @@
   }
 
   // Data filters
-  $: mapData = data?.filter((d : dataObj) => {
-    return filters.every((f : filterObj) => {
+  $: mapData = data?.filter((d: dataObj) => {
+    return filters.every((f: filterObj) => {
       return typeof f.value === "string"
         ? `${d[f.prop]}` == (f.value === "None" ? "null" : f.value)
         : Array.isArray(f.value)
-          ? +d[f.prop] >= f.value[0] &&
-            +d[f.prop] <= f.value[1]
+          ? +d[f.prop] >= f.value[0] && +d[f.prop] <= f.value[1]
           : false;
     });
   });
@@ -126,7 +129,7 @@
     : initialView;
   $: zoom = selectedIndex ? 14 : 11;
 
-  function toggleFilter(prop: filterProp, value: string | number[]) {
+  function toggleFilter(prop: filterProp, value: string | number[]) {    
     if (
       filters.find(
         (f) => f.prop === prop && (f.value === value || value === null)
@@ -143,9 +146,7 @@
         building.latitude,
         building.longitude
       )}">${building.Address}</a><br/>
-      <em>Pct. Seniors: </em>${d3.format(".1%")(
-        building["% of Seniors"]
-      )}<br/>
+      <em>Pct. Seniors: </em>${d3.format(".1%")(building["% of Seniors"])}<br/>
 <em>Stop</em>: <a target="_blank" href="${getStreetViewUrl(
       building.stop_lat,
       building.stop_lon
@@ -175,15 +176,18 @@
             : toggleFilter("wheelchair_boarding", event.target.ariaLabel)}
       />
       <BarChart
-        data={data}
-        y={"amenity"}
+        data={data?.map((d) => ({ y: d.amenity || "None" }))}
+        fill="rgb(104,175,252)"
         marginLeft={200}
         width={300}
         selected={filters.find((d) => d.prop === "amenity")?.value.toString()}
-        handleClick={(event) =>
+        domain={options}
+        handleClick={(event) => {
+          console.log(event.target.ariaLabel);
           !event.target.ariaLabel
             ? null
-            : toggleFilter("amenity", event.target.ariaLabel)}
+            : toggleFilter("amenity", event.target.ariaLabel);
+        }}
       />
     </div>
     <div class="flex flex-wrap mt-3">
@@ -224,10 +228,7 @@
           {#each mapData as building, index (building.id)}
             {#if displayBuildings}
               <Marker
-                latLng={[
-                  +building.latitude,
-                  +building.longitude,
-                ]}
+                latLng={[+building.latitude, +building.longitude]}
                 radius={4}
                 fillColor="black"
               >
@@ -238,10 +239,7 @@
             {/if}
             {#if displayStations}
               <Marker
-                latLng={[
-                  +building.stop_lat,
-                  +building.stop_lon,
-                ]}
+                latLng={[+building.stop_lat, +building.stop_lon]}
                 radius={4}
                 fillColor="red"
               >
@@ -294,7 +292,6 @@
             domain: [
               "Shelter With Bench Underneath",
               "Shelter Without Bench",
-              "Bench only",
               "None",
             ],
           },
@@ -314,7 +311,7 @@
                   y: false,
                   fx: false,
                   x: false,
-                  fill: false
+                  fill: false,
                 },
               },
               stroke: "white",
