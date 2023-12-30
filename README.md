@@ -10,12 +10,12 @@ packages with `yarn` and run `yarn dev` (or `npm install` and `npm run dev`).
 To deploy the project, run `yarn build` (or `npm run build`).
 
 ## TTC Stop Amenities
-TTC stop amenities, ie benches and shelters, were taken from 3 sources. In all cases, this data was joined with [TTC stop data](https://open.toronto.ca/dataset/ttc-routes-and-schedules/) using the TTC stop_code.
-- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was first erroneously joined using SITEID column, but it turns out there appears to be no association between street furniture bench data and TTC stops. So, any stop that has a bench within 10 meters of it is considered to have a bench nearby.
+TTC stop amenities, ie benches and shelters, were taken from 3 sources. In the first two cases, this data was joined with [TTC stop data](https://open.toronto.ca/dataset/ttc-routes-and-schedules/) using the TTC stop_code.
 - [Street Furniture - Transit Shelter - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-transit-shelter/). This data was joined using SITEID column, with the prefix letter 'T' removed. If a stop was found in this dataset, we marked has_shelter=True for that stop
-- A City data set obtained by OpenLab specifically highlighting shelters with benches. This data was joined using "TTC Stop ID." Link here if we can. If a stop was found in this dataset, we marked has_shelter_with_bench=True for that stop
+- A City data set obtained by OpenLab specifically highlighting shelters with benches. This data was joined using "TTC Stop ID." If a stop was found in this dataset, we marked has_shelter_with_bench=True for that stop
+- [Street Furniture - Bench - City of Toronto Open Data Portal](https://open.toronto.ca/dataset/street-furniture-bench/). This data was first erroneously joined using SITEID column, but it turns out there appears to be no association between street furniture bench data and TTC stops. So, [using geo-analysis](https://github.com/mkfreeman/norc-map/blob/main/data_processing/count_benches_near_stops.py) any stop that has a bench within 10 meters of it is counted (see "bench_count" in the data). 
 
-Unforunately, there are a number of issues with this data. As noted on the Open Data Portal, the first two data sets have no description of their columns, and so it is difficult to understand what kind of shelter or bench is present. We made minimal assumptions and hence made the decision noted with each data set above. 
+Unforunately, there are a number of issues with this data. As noted on the Open Data Portal, the 1st and 3rd data sets have no description of their columns, and so it is difficult to understand what kind of shelter or bench is present. We made minimal assumptions and hence made the decision noted with each data set above. 
 
 Furthermore, these data sets are inconsistent. Consider the definitions above and see this information:
 
@@ -31,7 +31,7 @@ Amenity = "Shelter with Bench Underneath" if has_shelter_with_bench = true
 
 Amenity = "Shelter without bench" if has_shelter_with_bench = false AND has_shelter = true
 
-If a bench is within 10 meters, then the amenity property also includes "Bench nearby."
+If a bench is within 10 meters and there is no existing "Shelter with Bench Underneath", then the amenity property also includes "Bench nearby."
 
 This is not perfect, but it conservatively reflects what we can reliably say given the data, without analyzing every single stop on Google StreetView or in person. 
 
