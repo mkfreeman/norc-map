@@ -70,16 +70,14 @@
         class="py-2.5 px-5 me-2
       text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg
       border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10
-      focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800
-      dark:text-gray-400 dark:border-gray-600 dark:hover:text-white
-      dark:hover:bg-gray-700 whitespace-nowrap">Download Table</button
+      focus:ring-4 focus:ring-gray-200 whitespace-nowrap">Download Table</button
       >
     </div>
   </div>
   <form class="flex mb-2">
     <label
       for="default-search"
-      class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white"
+      class="mb-2 text-sm font-medium text-gray-900 sr-only"
       >Search stops or buildings</label
     >
     <div class="relative w-60">
@@ -87,7 +85,7 @@
         class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
       >
         <svg
-          class="w-4 h-4 text-gray-500 dark:text-gray-400"
+          class="w-4 h-4 text-gray-500"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
